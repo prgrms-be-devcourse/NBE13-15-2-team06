@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: fridge
+
+  config:
+    import: optional:file:.env[.properties]   # 프로젝트 루트의 .env 파일을 읽음 (없으면 무시)
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/fridge?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update        # 개발 중에만 사용, 배포 시 validate 또는 none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+  jackson:
+    time-zone: Asia/Seoul
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 1800000   # 밀리초, 30분 (팀에서 만료 시간 확정 후 수정)
+
+logging:
+  level:
+    org.hibernate.SQL: debug
