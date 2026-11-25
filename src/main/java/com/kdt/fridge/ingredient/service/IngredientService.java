@@ -12,6 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class IngredientService {
@@ -64,5 +66,36 @@ public class IngredientService {
 
         Ingredient savedIngredient = ingredientRepository.save(ingredient);
         return IngredientResponse.from(savedIngredient);
+    }
+    @Transactional(readOnly = true)
+    public List<IngredientResponse> findAll(long groupId, long userId) {
+        requireGroupMember(groupId, userId);
+
+        List<Ingredient> ingredients =
+                ingredientRepository.findVisibleIngredients(groupId, userId);
+
+        List<IngredientResponse> responses = new ArrayList<>(ingredients.size());
+
+        for (Ingredient ingredient : ingredients) {
+            IngredientResponse response = IngredientResponse.from(ingredient);
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    private void requireGroupMember(long groupId, long userId) {
+        Boolean member = jdbcTemplate.queryForObject("""
+            SELECT EXISTS (
+                SELECT 1 FROM group_members
+                WHERE group_id = ? AND user_id = ?
+            )
+            """, Boolean.class, groupId, userId);
+
+        if (!Boolean.TRUE.equals(member)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "냉장고 그룹 구성원이 아닙니다."
+            );
+        }
     }
 }
