@@ -4,12 +4,15 @@ import com.kdt.fridge.ingredient.dto.IngredientCreateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.entity.Ingredient;
 import com.kdt.fridge.ingredient.repository.IngredientRepository;
+import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -82,6 +85,85 @@ public class IngredientService {
         }
 
         return responses;
+    }
+    @Transactional(readOnly = true)
+    public IngredientResponse getDetail(long groupId,long ingredientId,long userId){
+        requireGroupMember(groupId,userId);
+
+        Ingredient ingredient = ingredientRepository.findByIdAndGroupId(ingredientId,groupId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "식재료를 찾을 수 없습니다."
+                ));
+        return IngredientResponse.from(ingredient);
+    }
+    @Transactional
+    public IngredientResponse update(
+            long groupId,
+            long ingredientId,
+            long userId,
+            IngredientUpdateRequest request
+    ){
+        List<String> roles = jdbcTemplate.queryForList("""
+            SELECT role
+            FROM group_members
+            WHERE group_id = ? AND user_id = ?
+            """,String.class,groupId,userId);
+        if(roles.isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "냉장고 그룹 구성원이 아닙니다."
+            );
+        }
+        Ingredient ingredient = ingredientRepository.findByIdAndGroupId(ingredientId,groupId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,"식재료를 찾을 수 없습니다."
+        ));
+
+        boolean canUpdate = ingredient.isShared()
+                ? roles.contains("ADMIN")
+                : Long.valueOf(userId).equals(ingredient.getOwnerId());
+
+        if(!canUpdate) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,"이 식재료를 수정할 권한이 없습니다."
+            );
+        }
+        String name = request.name() == null ? ingredient.getName() : request.name().strip();
+        if(name != null && name.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,"식재료 이름을 공백일 수 없습니다."
+            );
+        }
+        String unit = request.unit() == null ? ingredient.getUnit() : request.unit();
+        String storageType = request.storageType() == null
+                ? ingredient.getStorageType()
+                : request.storageType();
+        LocalDate purchasedAt = request.purchasedAt() == null
+                ? ingredient.getPurchasedAt()
+                : request.purchasedAt();
+        LocalDate expiresAt = request.expiresAt() == null
+                ? ingredient.getExpiresAt()
+                : request.expiresAt();
+        Integer notifyDaysBefore = request.notifyDaysBefore() == null
+                ? ingredient.getNotifyDaysBefore()
+                : request.notifyDaysBefore();
+        if((request.purchasedAt() != null || request.expiresAt() != null)
+               && purchasedAt != null && expiresAt != null
+               && expiresAt.isBefore(purchasedAt)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,"유통기한은 구매일보다 빠를 수 없습니다."
+            );
+        }
+        ingredient.updateBasicInfo(
+                name,
+                unit,
+                storageType,
+                purchasedAt,
+                expiresAt,
+                notifyDaysBefore,
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        );
+        return IngredientResponse.from(ingredient);
     }
 
     private void requireGroupMember(long groupId, long userId) {

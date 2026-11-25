@@ -3,6 +3,7 @@ package com.kdt.fridge.ingredient.controller;
 import com.kdt.fridge.ingredient.dto.IngredientCreateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.service.IngredientService;
+import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,5 +47,32 @@ public class IngredientController {
             );
         }
         return ingredientService.findAll(groupId,principal.userId());
+    }
+    @GetMapping("/{ingredientId}")
+    public IngredientResponse getDetail(
+            @PathVariable("groupId") long groupId,
+            @PathVariable("ingredientId") long ingredientId,
+            @AuthenticationPrincipal IngredientUserPrincipal principal
+    ) {
+        if (principal == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."
+            );
+        }
+        return ingredientService.getDetail(groupId,ingredientId,principal.userId());
+    }
+    @PatchMapping("/{ingredientId}")
+    public IngredientResponse update(
+            @PathVariable("groupId")long groupId,
+            @PathVariable("ingredientId")long ingredientId,
+            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @Valid @RequestBody IngredientUpdateRequest request
+    ) {
+        if (principal == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+        return ingredientService.update(groupId,ingredientId,principal.userId(),request);
     }
 }

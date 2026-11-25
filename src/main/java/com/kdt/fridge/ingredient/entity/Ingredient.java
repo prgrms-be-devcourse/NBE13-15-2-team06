@@ -89,5 +89,22 @@ public class Ingredient {
         this.updatedAt = createdAt;
 
     }
+    public void updateBasicInfo(
+            String name,
+            String unit,
+            String storageType,
+            LocalDate purchasedAt,
+            LocalDate expiresAt,
+            Integer notifyDaysBefore,
+            LocalDateTime updatedAt
+    ){
+        this.name = name;
+        this.unit = unit;
+        this.storageType = storageType;
+        this.purchasedAt = purchasedAt;
+        this.expiresAt = expiresAt;
+        this.notifyDaysBefore = notifyDaysBefore;
+        this.updatedAt = updatedAt;
+    }
 
 }
