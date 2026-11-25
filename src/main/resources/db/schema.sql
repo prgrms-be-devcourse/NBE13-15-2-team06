@@ -95,3 +95,20 @@ CREATE TABLE notifications (
                                CONSTRAINT fk_notifications_ingredient
                                    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE notification_settings (
+                                       id BIGINT NOT NULL AUTO_INCREMENT,
+                                       user_id BIGINT NOT NULL,
+                                       group_id BIGINT NOT NULL,
+                                       enabled BOOLEAN DEFAULT TRUE NOT NULL,
+                                       receive_others BOOLEAN DEFAULT TRUE NOT NULL,
+                                       notify_time TIME NOT NULL DEFAULT '09:00:00',
+
+
+                                       PRIMARY KEY (id),
+                                       UNIQUE KEY uk_notification_settings_user_group (user_id, group_id),
+                                       CONSTRAINT fk_notification_settings_user
+                                           FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, #부모 삭제시 자식도
+                                       CONSTRAINT fk_notification_settings_groups
+                                           FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
