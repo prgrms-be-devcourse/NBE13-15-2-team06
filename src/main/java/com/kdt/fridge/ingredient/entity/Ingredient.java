@@ -114,5 +114,9 @@ public class Ingredient {
             this.status = "CONSUMED";
         }
     }
-
+    public void discard(LocalDateTime now) {
+        this.quantity = 0L;
+        this.status = "DISCARDED";
+        this.updatedAt = now;
+    }
 }

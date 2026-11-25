@@ -31,7 +31,16 @@ public enum ErrorCode {
             "보관 중인 식재료만 소비할 수 있습니다."),
     INGREDIENT_INSUFFICIENT_QUANTITY(
             HttpStatus.CONFLICT, "INGREDIENT_INSUFFICIENT_QUANTITY",
-            "남은 수량보다 많이 소비할 수 없습니다.");
+            "남은 수량보다 많이 소비할 수 없습니다."),
+    INGREDIENT_STATUS_UPDATE_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_STATUS_UPDATE_FORBIDDEN",
+                    "이 식재료의 상태를 변경할 권한이 없습니다."),
+    INGREDIENT_INVALID_STATUS_TRANSITION(
+            HttpStatus.CONFLICT, "INGREDIENT_INVALID_STATUS_TRANSITION",
+                    "현재 상태에서 요청한 상태로 변경할 수 없습니다."),
+    INGREDIENT_INVALID_STORED_QUANTITY(
+            HttpStatus.CONFLICT, "INGREDIENT_INVALID_STORED_QUANTITY",
+                    "저장된 식재료 수량이 올바르지 않습니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -8,6 +8,7 @@ import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientConsumeRequest;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.response.ApiResponse;
+import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -93,5 +94,25 @@ public class IngredientController {
                 groupId,ingredientId,principal.userId(),request.quantity()
         );
         return ApiResponse.of(HttpStatus.OK,"식재료를 소비했습니다.",response);
+    }
+    @PatchMapping("/{ingredientId}/status")
+    public ApiResponse<IngredientResponse> updateStatus(
+            @PathVariable("groupId") long groupId,
+            @PathVariable("ingredientId") long ingredientId,
+            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @Valid @RequestBody IngredientStatusUpdateRequest request
+    ) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        IngredientResponse response = ingredientService.updateStatus(
+                groupId,
+                ingredientId,
+                principal.userId(),
+                request.status()
+        );
+
+        return ApiResponse.of(HttpStatus.OK, "식재료 상태를 변경했습니다.", response);
     }
 }
