@@ -1,0 +1,46 @@
+### 회원가입 - 정상 (201)
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "jaemin@example.com",
+  "password": "fridge1234!"
+}
+
+### 회원가입 - 비밀번호 규칙 위반 (400, COMMON_001)
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "1234"
+}
+
+### 로그인 - 성공 (200) : 받은 토큰을 accessToken 변수에 저장
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jaemin@example.com",
+  "password": "fridge1234!"
+}
+
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+%}
+
+### 로그인 - 비밀번호 틀림 (401, AUTH_001)
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jaemin@example.com",
+  "password": "wrong1234!"
+}
+
+### 토큰 없이 호출 (401, AUTH_002)
+GET http://localhost:8080/api/v1/users/me
+
+### 토큰 넣고 호출 (지금은 404, U-05 만들면 200)
+GET http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
