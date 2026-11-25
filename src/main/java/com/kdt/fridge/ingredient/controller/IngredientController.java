@@ -1,9 +1,13 @@
 package com.kdt.fridge.ingredient.controller;
 
+import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.ingredient.dto.IngredientCreateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.service.IngredientService;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
+import com.kdt.fridge.ingredient.dto.IngredientConsumeRequest;
+import com.kdt.fridge.global.exception.BusinessException;
+import com.kdt.fridge.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -74,5 +78,20 @@ public class IngredientController {
             );
         }
         return ingredientService.update(groupId,ingredientId,principal.userId(),request);
+    }
+    @PostMapping("/{ingredientId}consumptions")
+    public ApiResponse<IngredientResponse> consume(
+            @PathVariable("groupId") long groupId,
+            @PathVariable("ingrdientid") long ingredientId,
+            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @Valid @RequestBody IngredientConsumeRequest request
+    ) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        IngredientResponse response = ingredientService.consume(
+                groupId,ingredientId,principal.userId(),request.quantity()
+        );
+        return ApiResponse.of(HttpStatus.OK,"식재료를 소비했습니다.",response);
     }
 }

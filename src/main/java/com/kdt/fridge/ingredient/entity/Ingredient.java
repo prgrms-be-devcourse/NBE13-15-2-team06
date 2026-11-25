@@ -106,5 +106,13 @@ public class Ingredient {
         this.notifyDaysBefore = notifyDaysBefore;
         this.updatedAt = updatedAt;
     }
+    public void applyConsumption(long remainingQuantity,LocalDateTime now){
+        this.quantity = remainingQuantity;
+        this.updatedAt = now;
+
+        if(remainingQuantity == 0) {
+            this.status = "CONSUMED";
+        }
+    }
 
 }

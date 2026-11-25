@@ -5,7 +5,10 @@ import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.entity.Ingredient;
 import com.kdt.fridge.ingredient.repository.IngredientRepository;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
+import com.kdt.fridge.global.exception.BusinessException;
+import com.kdt.fridge.global.exception.ErrorCode;
 import org.apache.coyote.Response;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -114,7 +117,7 @@ public class IngredientService {
                     HttpStatus.FORBIDDEN, "냉장고 그룹 구성원이 아닙니다."
             );
         }
-        Ingredient ingredient = ingredientRepository.findByIdAndGroupId(ingredientId,groupId)
+        Ingredient ingredient = ingredientRepository.findForUpdate(ingredientId,groupId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"식재료를 찾을 수 없습니다."
         ));
@@ -163,6 +166,55 @@ public class IngredientService {
                 notifyDaysBefore,
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );
+        return IngredientResponse.from(ingredient);
+    }
+    @Transactional
+    public IngredientResponse consume(
+            long groupId,
+            long ingredientId,
+            long userId,
+            long amount
+    ) {
+        if (amount <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        }
+
+        Boolean member = jdbcTemplate.queryForObject("""
+                SELECT EXISTS(
+                    SELECT 1 FROM group_members
+                    WHERE group_id = ? AND user_id = ?
+                )
+                """,Boolean.class,groupId,userId);
+        if (!Boolean.TRUE.equals(member)) {
+            throw new BusinessException(ErrorCode.INGREDIENT_GROUP_MEMBER_REQUIRED);
+        }
+
+        Ingredient ingredient = ingredientRepository.findForUpdate(ingredientId,groupId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INGREDIENT_NOT_FOUND));
+        if (!ingredient.isShared() && !Long.valueOf(userId).equals(ingredient.getOwnerId())) {
+            throw new BusinessException(ErrorCode.INGREDIENT_CONSUMPTION_FORBIDDEN);
+        }
+
+        if (!"STORED".equals(ingredient.getStatus())) {
+            throw new BusinessException(ErrorCode.INGREDIENT_NOT_STORED);
+        }
+
+        Long currentQuantity = ingredient.getQuantity();
+        if(currentQuantity == null || currentQuantity < amount) {
+            throw new BusinessException(ErrorCode.INGREDIENT_INSUFFICIENT_QUANTITY);
+        }
+
+        long remainingQuantity = currentQuantity - amount;
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+        ingredient.applyConsumption(remainingQuantity,now);
+
+        jdbcTemplate.update("""
+            INSERT INTO ingredient_histories
+                (ingredient_id,user_id,action,quantity_change,created_at)
+            VALUES (?,?,?,?,?)
+            """,ingredientId,userId,"CONSUME",-amount,now);
+
         return IngredientResponse.from(ingredient);
     }
 
