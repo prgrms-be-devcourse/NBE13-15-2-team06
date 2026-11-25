@@ -3,6 +3,7 @@ package com.kdt.fridge.user.controller;
 import com.kdt.fridge.global.response.ApiResponse;
 import com.kdt.fridge.user.dto.NicknameUpdateRequest;
 import com.kdt.fridge.user.dto.NicknameUpdateResponse;
+import com.kdt.fridge.user.dto.UserPasswordUpdateRequest;
 import com.kdt.fridge.user.dto.UserProfileResponse;
 import com.kdt.fridge.user.service.UserService;
 import jakarta.validation.Valid;
@@ -32,5 +33,13 @@ public class UserController {
             @Valid @RequestBody NicknameUpdateRequest request) {
         NicknameUpdateResponse response = userService.updateNickname(userId, request);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "닉네임이 설정되었습니다.", response));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody UserPasswordUpdateRequest request) {
+        userService.updatePassword(userId, request);
+        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "비밀번호가 변경되었습니다.", null));
     }
 }

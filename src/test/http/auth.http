@@ -93,3 +93,52 @@ Content-Type: application/json
 {
   "nickname": "재민"
 }
+
+### 비밀번호 변경 - 현재 비밀번호 틀림 (400, USER_004)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "wrong1234!",
+  "newPassword": "newfridge1234!"
+}
+
+### 비밀번호 변경 - 같은 비밀번호 (400, USER_005)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "fridge1234!",
+  "newPassword": "fridge1234!"
+}
+
+### 비밀번호 변경 - 성공 (200, data: null)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "fridge1234!",
+  "newPassword": "newfridge1234!"
+}
+
+### 바뀐 비밀번호로 로그인 (200)
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jaemin@example.com",
+  "password": "newfridge1234!"
+}
+
+### 원래 비밀번호로 되돌리기 (200)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "newfridge1234!",
+  "newPassword": "fridge1234!"
+}
