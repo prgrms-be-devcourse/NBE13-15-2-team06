@@ -2,6 +2,8 @@ package com.kdt.fridge.user.service;
 
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
+import com.kdt.fridge.user.dto.NicknameUpdateRequest;
+import com.kdt.fridge.user.dto.NicknameUpdateResponse;
 import com.kdt.fridge.user.dto.UserProfileResponse;
 import com.kdt.fridge.user.entity.User;
 import com.kdt.fridge.user.repository.UserRepository;
@@ -23,5 +25,22 @@ public class UserService {
     private User findUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public NicknameUpdateResponse updateNickname(Long userId, NicknameUpdateRequest request) {
+        User user = findUser(userId);
+        String newNickname = request.nickname();
+
+        if (newNickname.equals(user.getNickname())) {
+            return NicknameUpdateResponse.from(user);
+        }
+
+        if (userRepository.existsByNickname(newNickname)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        user.changeNickname(newNickname);
+        return NicknameUpdateResponse.from(user);
     }
 }
