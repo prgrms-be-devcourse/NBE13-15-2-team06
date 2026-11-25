@@ -84,6 +84,7 @@ CREATE TABLE notifications (
                                id BIGINT NOT NULL AUTO_INCREMENT,
                                user_id BIGINT NOT NULL,
                                ingredient_id BIGINT NOT NULL,
+                               group_id BIGINT NOT NULL,
                                type VARCHAR(30) NOT NULL,
                                message VARCHAR(255) COLLATE utf8mb4_bin NULL,
                                is_read BOOLEAN NOT NULL DEFAULT FALSE,
@@ -92,6 +93,8 @@ CREATE TABLE notifications (
                                PRIMARY KEY (id),
                                CONSTRAINT fk_notifications_user
                                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, #부모 삭제시 자식도
+                               CONSTRAINT fk_notifications_group
+                                   FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE,
                                CONSTRAINT fk_notifications_ingredient
                                    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -109,6 +112,6 @@ CREATE TABLE notification_settings (
                                        UNIQUE KEY uk_notification_settings_user_group (user_id, group_id),
                                        CONSTRAINT fk_notification_settings_user
                                            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, #부모 삭제시 자식도
-                                       CONSTRAINT fk_notification_settings_groups
+                                       CONSTRAINT fk_notification_settings_group
                                            FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

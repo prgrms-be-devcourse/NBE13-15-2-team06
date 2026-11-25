@@ -1,4 +1,8 @@
 package com.kdt.fridge.notification;
 
-public record NotificationTimeRequest() {
+import java.time.LocalTime;
+
+public record NotificationTimeRequest(
+        LocalTime notifyTime
+) {
 }

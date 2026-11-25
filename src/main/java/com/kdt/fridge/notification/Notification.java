@@ -24,6 +24,9 @@ public class Notification {
     @Column(nullable = false)
     private Long ingredientId;
 
+    @Column(nullable = false)
+    private Long groupId;
+
     @Column(nullable = false,length = 30)
     @Enumerated(EnumType.STRING)
     private NotificationType type;
@@ -39,9 +42,10 @@ public class Notification {
     private LocalDateTime createdAt;
 
     //생성자
-    public Notification(Long userId, Long ingredientId, NotificationType type, String message) {
+    public Notification(Long userId, Long ingredientId, Long groupId, NotificationType type, String message) {
         this.userId = userId;
         this.ingredientId = ingredientId;
+        this.groupId = groupId;
         this.type = type;
         this.message = message;
         this.isRead = false;
