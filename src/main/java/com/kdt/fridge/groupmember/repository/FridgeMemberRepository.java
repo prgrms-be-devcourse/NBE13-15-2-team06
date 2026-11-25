@@ -2,7 +2,6 @@ package com.kdt.fridge.groupmember.repository;
 
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
-import com.kdt.fridge.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -27,6 +26,4 @@ public interface FridgeMemberRepository extends JpaRepository<FridgeMember, Long
 
     //냉장고의 구성원 수
     long countByFridgeId(Long fridgeId);
-
-    Long user(User user);
 }

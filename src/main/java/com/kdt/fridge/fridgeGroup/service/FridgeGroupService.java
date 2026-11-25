@@ -9,6 +9,7 @@ import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
 import com.kdt.fridge.user.entity.User;
+import com.kdt.fridge.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class FridgeGroupService {
 
     private final FridgeGroupRepository fridgeGroupRepository;
     private final FridgeMemberRepository fridgeMemberRepository;
+    private final UserRepository userRepository;
 
     //냉장고 생성
     //냉장고를 만든 사람일 admin이 되며, 냉장고와 멤버 저장을 한 트랜잭션으로 묶음
