@@ -44,3 +44,108 @@ GET http://localhost:8080/api/v1/users/me
 ### 토큰 넣고 호출 (지금은 404, U-05 만들면 200)
 GET http://localhost:8080/api/v1/users/me
 Authorization: Bearer {{accessToken}}
+
+### 닉네임 설정 - 성공 (200)
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "nickname": "재민"
+}
+
+### 닉네임 설정 - 형식 위반 (400, COMMON_001)
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "nickname": "재 민!"
+}
+
+### 두 번째 계정 가입 (201)
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "second@example.com",
+  "password": "fridge1234!"
+}
+
+### 두 번째 계정 로그인 : accessToken2에 저장
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "second@example.com",
+  "password": "fridge1234!"
+}
+
+> {%
+    client.global.set("accessToken2", response.body.data.accessToken);
+%}
+
+### 두 번째 계정이 같은 닉네임 설정 - 중복 (409, USER_003)
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{accessToken2}}
+Content-Type: application/json
+
+{
+  "nickname": "재민"
+}
+
+### 비밀번호 변경 - 현재 비밀번호 틀림 (400, USER_004)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "wrong1234!",
+  "newPassword": "newfridge1234!"
+}
+
+### 비밀번호 변경 - 같은 비밀번호 (400, USER_005)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "fridge1234!",
+  "newPassword": "fridge1234!"
+}
+
+### 비밀번호 변경 - 성공 (200, data: null)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "fridge1234!",
+  "newPassword": "newfridge1234!"
+}
+
+### 바뀐 비밀번호로 로그인 (200)
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jaemin@example.com",
+  "password": "newfridge1234!"
+}
+
+### 원래 비밀번호로 되돌리기 (200)
+PATCH http://localhost:8080/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "newfridge1234!",
+  "newPassword": "fridge1234!"
+}
+
+### 로그아웃 - 성공 (204)
+POST http://localhost:8080/api/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### 로그아웃 - 토큰 없음 (401, AUTH_002)
+POST http://localhost:8080/api/v1/auth/logout
