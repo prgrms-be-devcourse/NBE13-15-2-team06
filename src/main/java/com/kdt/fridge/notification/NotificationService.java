@@ -1,5 +1,7 @@
 package com.kdt.fridge.notification;
 
+import com.kdt.fridge.global.exception.BusinessException;
+import com.kdt.fridge.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +29,18 @@ public class NotificationService {
     //알림 읽음 처리
     @Transactional
     public void markNotificationAsRead(Long userId, Long notificationId){
-        Notification notification = notificationRepository.findById(notificationId).orElseThrow(InvalidId);
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new BusinessException(ErrorCode.NOTIFICATION_NOT_FOUND));
         if (!userId.equals(notification.getUserId())){
-            throw new Error
+            throw new BusinessException(ErrorCode.NOTIFICATION_ACCESS_DENIED);
         }
         notification.markAsRead();
     }
+
+    //그룹 알림 설정 조회
+//    @Transactional(readOnly = true)
+//    public NotificationSettingResponse getGroupNotificationSetting(Long userId, Long groupId){
+//        NotificationSetting setting = notificationSettingRepository.findByUserIdAndGroupId(userId,groupId).orElseThrow(()-> new BusinessException(ErrorCode.));
+//
+//        return NotificationSettingResponse;
+//    }
 }
