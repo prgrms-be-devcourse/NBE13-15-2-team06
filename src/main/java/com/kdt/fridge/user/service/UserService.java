@@ -1,0 +1,27 @@
+package com.kdt.fridge.user.service;
+
+import com.kdt.fridge.global.exception.BusinessException;
+import com.kdt.fridge.global.exception.ErrorCode;
+import com.kdt.fridge.user.dto.UserProfileResponse;
+import com.kdt.fridge.user.entity.User;
+import com.kdt.fridge.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserProfileResponse getMyProfile(Long userId) {
+        return UserProfileResponse.from(findUser(userId));
+    }
+
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+}
