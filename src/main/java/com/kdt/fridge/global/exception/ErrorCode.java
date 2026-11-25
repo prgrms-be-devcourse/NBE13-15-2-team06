@@ -17,10 +17,14 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "DUPLICATE_NICKNAME", "이미 사용 중인 닉네임입니다."),
 
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "PASSWORD_MISMATCH", "현재 비밀번호가 일치하지 않습니다."),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "새 비밀번호가 현재 비밀번호와 같습니다."),
+    PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "PASSWORD_NOT_SET", "비밀번호가 없는 계정입니다."),
+
     //냉장고 관리 에러코드
     FRIDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIDGE_NOT_FOUND", "냉장고를 찾을 수 없습니다."),
     NOT_FRIDGE_MEMBER(HttpStatus.FORBIDDEN, "NOT_FRIDGE_MEMBER", "해당 냉장고의 구성원이 아닙니다."),
-    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN,"NOT_FRIDGE_ADMIN" ,"해당 냉장고의 관리자가 아닙니다." );
+    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN, "NOT_FRIDGE_ADMIN", "해당 냉장고의 관리자가 아닙니다.");
 
     private final HttpStatus status;
     private final String code;
