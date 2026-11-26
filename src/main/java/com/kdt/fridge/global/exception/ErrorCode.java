@@ -18,7 +18,12 @@ public enum ErrorCode {
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "DUPLICATE_NICKNAME", "이미 사용 중인 닉네임입니다."),
 
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_NOT_FOUND", "존재하지 않는 알림입니다."),
-    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION_ACCESS_DENIED", "수정 권한이 없습니다"),
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION_ACCESS_DENIED", "본인 알림이 아닙니다."),
+    NOTIFICATION_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_SETTING_NOT_FOUND", "알림 설정이 존재하지 않습니다."),
+
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "PASSWORD_MISMATCH", "현재 비밀번호가 일치하지 않습니다."),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "새 비밀번호가 현재 비밀번호와 같습니다."),
+    PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "PASSWORD_NOT_SET", "비밀번호가 없는 계정입니다."),
 
     INGREDIENT_GROUP_MEMBER_REQUIRED(
             HttpStatus.FORBIDDEN, "INGREDIENT_GROUP_MEMBER_REQUIRED",
@@ -44,9 +49,6 @@ public enum ErrorCode {
     INGREDIENT_INVALID_STORED_QUANTITY(
             HttpStatus.CONFLICT, "INGREDIENT_INVALID_STORED_QUANTITY",
             "저장된 식재료 수량이 올바르지 않습니다."),
-    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "PASSWORD_MISMATCH", "현재 비밀번호가 일치하지 않습니다."),
-    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "새 비밀번호가 현재 비밀번호와 같습니다."),
-    PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "PASSWORD_NOT_SET", "비밀번호가 없는 계정입니다."),
 
     //냉장고 관리 에러코드
     FRIDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIDGE_NOT_FOUND", "냉장고를 찾을 수 없습니다."),

@@ -5,8 +5,8 @@ import java.time.LocalTime;
 public record NotificationSettingResponse(
     Long userId,
     Long groupId,
-    boolean enabled,
-    boolean receiveOthers,
+    Boolean enabled,
+    Boolean receiveOthers,
     LocalTime notifyTime
     ) {
 

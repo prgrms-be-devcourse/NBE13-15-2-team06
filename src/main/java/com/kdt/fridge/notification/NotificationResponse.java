@@ -8,7 +8,7 @@ public record NotificationResponse(
         String message,
         Long groupId,
         Long ingredientId,
-        boolean isRead,
+        Boolean isRead,
         LocalDateTime createdAt
 ) {
     public static NotificationResponse from(Notification notification) {

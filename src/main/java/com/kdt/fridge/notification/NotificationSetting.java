@@ -40,4 +40,15 @@ public class NotificationSetting {
         this.receiveOthers = true;
         this.notifyTime = LocalTime.of(9,0);
     }
+
+    //설정 업데이트용 매서드
+    public void updateSetting(boolean enabled, boolean receiveOthers) {
+        this.enabled = enabled;
+        this.receiveOthers = receiveOthers;
+    }
+
+    //시간 업데이트용 매서드
+    public void updateTime(LocalTime notifyTime) {
+        this.notifyTime = notifyTime;
+    }
 }
