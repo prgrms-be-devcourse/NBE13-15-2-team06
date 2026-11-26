@@ -1,4 +1,4 @@
-package com.kdt.fridge.groupmember;
+package com.kdt.fridge.groupmember.repository;
 
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
@@ -20,4 +20,10 @@ public interface FridgeMemberRepository extends JpaRepository<FridgeMember, Long
 
     // 관리자 몇 명인지 확인
     long countByFridgeIdAndRole(Long fridgeId, MemberRole role);
+
+    //내가 속한 냉장고 목록
+    List<FridgeMember> findByUserId(Long userId);
+
+    //냉장고의 구성원 수
+    long countByFridgeId(Long fridgeId);
 }
