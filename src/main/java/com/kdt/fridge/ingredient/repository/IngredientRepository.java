@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.security.core.parameters.P;
+import org.springframework.data.domain.Sort;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,5 +35,18 @@ public interface IngredientRepository extends JpaRepository<Ingredient,Long> {
     Optional<Ingredient> findForUpdate(
             @Param("ingredientId")long ingredientId,
             @Param("groupId")long groupId
+    );
+
+    List<Ingredient> findAllByGroupId(Long groupId,Sort sort);
+
+    List<Ingredient> findAllByGroupIdAndNameContaining(
+            Long groupId,String keyword,Sort sort);
+
+    List<Ingredient> findAllByGroupIdAndExpiresAtBetween(
+            Long groupId,LocalDate from,LocalDate to,Sort sort
+    );
+
+    List<Ingredient> findAllByGroupIdAndNameContainingAndExpiresAtBetween(
+            Long groupId,String keyword,LocalDate from,LocalDate to,Sort sort
     );
 }
