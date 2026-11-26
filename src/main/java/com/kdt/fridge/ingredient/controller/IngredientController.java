@@ -6,6 +6,7 @@ import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.service.IngredientService;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientConsumeRequest;
+import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.response.ApiResponse;
 import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest;
@@ -30,68 +31,68 @@ public class IngredientController {
     @ResponseStatus(HttpStatus.CREATED)
     public IngredientResponse create(
             @PathVariable("groupId") long groupId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody IngredientCreateRequest request
     ) {
-        if (principal == null) {
+        if (userId == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
             );
         }
 
-        return ingredientService.create(groupId, principal.userId(), request);
+        return ingredientService.create(groupId,userId,request);
     }
     @GetMapping
     public List<IngredientResponse>findAll(
             @PathVariable("groupId")long groupId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal
+            @AuthenticationPrincipal Long userId
     ){
-        if(principal == null){
+        if(userId == null){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."
             );
         }
-        return ingredientService.findAll(groupId,principal.userId());
+        return ingredientService.findAll(groupId,userId);
     }
     @GetMapping("/{ingredientId}")
     public IngredientResponse getDetail(
             @PathVariable("groupId") long groupId,
             @PathVariable("ingredientId") long ingredientId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal
+            @AuthenticationPrincipal Long userId
     ) {
-        if (principal == null) {
+        if (userId == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."
             );
         }
-        return ingredientService.getDetail(groupId,ingredientId,principal.userId());
+        return ingredientService.getDetail(groupId,ingredientId,userId);
     }
     @PatchMapping("/{ingredientId}")
     public IngredientResponse update(
             @PathVariable("groupId")long groupId,
             @PathVariable("ingredientId")long ingredientId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody IngredientUpdateRequest request
     ) {
-        if (principal == null) {
+        if (userId == null) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
             );
         }
-        return ingredientService.update(groupId,ingredientId,principal.userId(),request);
+        return ingredientService.update(groupId,ingredientId,userId,request);
     }
-    @PostMapping("/{ingredientId}consumptions")
+    @PostMapping("/{ingredientId}/consumptions")
     public ApiResponse<IngredientResponse> consume(
             @PathVariable("groupId") long groupId,
-            @PathVariable("ingrdientid") long ingredientId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @PathVariable("ingrdientId") long ingredientId,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody IngredientConsumeRequest request
     ) {
-        if (principal == null) {
+        if (userId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         IngredientResponse response = ingredientService.consume(
-                groupId,ingredientId,principal.userId(),request.quantity()
+                groupId,ingredientId,userId,request.quantity()
         );
         return ApiResponse.of(HttpStatus.OK,"식재료를 소비했습니다.",response);
     }
@@ -99,20 +100,34 @@ public class IngredientController {
     public ApiResponse<IngredientResponse> updateStatus(
             @PathVariable("groupId") long groupId,
             @PathVariable("ingredientId") long ingredientId,
-            @AuthenticationPrincipal IngredientUserPrincipal principal,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody IngredientStatusUpdateRequest request
     ) {
-        if (principal == null) {
+        if (userId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         IngredientResponse response = ingredientService.updateStatus(
                 groupId,
                 ingredientId,
-                principal.userId(),
+                userId,
                 request.status()
         );
 
         return ApiResponse.of(HttpStatus.OK, "식재료 상태를 변경했습니다.", response);
+    }
+    @GetMapping("/{ingredientId}/histories")
+    public ApiResponse<List<IngredientHistoryResponse>> getHistories(
+            @PathVariable("groupId")long groupId,
+            @PathVariable("ingredientId")long ingredientId,
+            @AuthenticationPrincipal Long userId
+    ){
+        if (userId == null){
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        List<IngredientHistoryResponse> histories =
+                ingredientService.getHistories(groupId,ingredientId,userId);
+        return ApiResponse.of(HttpStatus.OK,"식재료 변경 이력을 조회했습니다.",histories);
     }
 }

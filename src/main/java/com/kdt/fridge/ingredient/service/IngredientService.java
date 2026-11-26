@@ -6,10 +6,9 @@ import com.kdt.fridge.ingredient.entity.Ingredient;
 import com.kdt.fridge.ingredient.repository.IngredientRepository;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest.Status;
+import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
-import org.apache.coyote.Response;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -290,10 +289,36 @@ public class IngredientService {
 
         return IngredientResponse.from(ingredient);
     }
+    @Transactional(readOnly = true)
+    public List<IngredientHistoryResponse> getHistories(
+            long groupId,
+            long ingredientId,
+            long userId
+    ){
+        requireGroupMember(groupId,userId);
+
+        ingredientRepository.findByIdAndGroupId(ingredientId,groupId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INGREDIENT_NOT_FOUND));
+        return jdbcTemplate.query("""
+                SELECT id,user_id,action,quantity_change,detail,created_at
+                FROM ingredient_histories
+                WHERE ingredient_id = ?
+                ORDER BY created_at DESC,id DESC
+                """,
+                (rs,rowNum) -> new IngredientHistoryResponse(
+                        rs.getLong("id"),
+                        rs.getObject("user_id",Long.class),
+                        rs.getString("action"),
+                        rs.getObject("quantity_change",Long.class),
+                        rs.getString("detail"),
+                        rs.getObject("created_at",LocalDateTime.class)
+                ),
+                ingredientId
+        );
+    }
 
     private void requireGroupMember(long groupId, long userId) {
         Boolean member = jdbcTemplate.queryForObject("""
-            
                 SELECT EXISTS (
                 SELECT 1 FROM group_members
                 WHERE group_id = ? AND user_id = ?
