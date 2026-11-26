@@ -13,9 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-
 @RequiredArgsConstructor
-
 @Transactional(readOnly = true)
 public class FridgeMemberService {
     private final FridgeMemberRepository fridgeMemberRepository;
@@ -24,13 +22,15 @@ public class FridgeMemberService {
     public List<FridgeMemberResponse> getMembers(Long fridgeId, Long loginUserId) {
         fridgeMemberValidator.getMember(fridgeId, loginUserId);
 
-        return fridgeMemberRepository.findAllByFridgeId(fridgeId).stream()
+        return fridgeMemberRepository.findAllByFridgeIdOrderByJoinedAtAscIdAsc(fridgeId).stream()
                 .map(FridgeMemberResponse::from)
                 .toList();
     }
 
     @Transactional
     public void leave(Long fridgeId, Long loginUserId) {
+        fridgeMemberValidator.lockFridge(fridgeId);
+
         FridgeMember me = fridgeMemberValidator.getMember(fridgeId, loginUserId);
 
         if (me.isAdmin()) {
@@ -42,6 +42,8 @@ public class FridgeMemberService {
 
     @Transactional
     public void kick(Long fridgeId, Long memberId, Long loginUserId) {
+        fridgeMemberValidator.lockFridge(fridgeId);
+
         FridgeMember admin = fridgeMemberValidator.getAdmin(fridgeId, loginUserId);
 
         FridgeMember target = findTarget(fridgeId, memberId);
@@ -55,6 +57,8 @@ public class FridgeMemberService {
 
     @Transactional
     public FridgeMemberResponse changeRole(Long fridgeId, Long memberId, MemberRole newRole, Long loginUserId) {
+        fridgeMemberValidator.lockFridge(fridgeId);
+
         fridgeMemberValidator.getAdmin(fridgeId, loginUserId);
 
         FridgeMember target = findTarget(fridgeId, memberId);
