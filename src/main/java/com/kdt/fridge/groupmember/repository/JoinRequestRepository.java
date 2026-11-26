@@ -1,7 +1,7 @@
 package com.kdt.fridge.groupmember.repository;
 
 import com.kdt.fridge.groupmember.entity.JoinRequest;
-import com.kdt.fridge.groupmember.role.JoinRequestStatus;
+import com.kdt.fridge.groupmember.entity.JoinRequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

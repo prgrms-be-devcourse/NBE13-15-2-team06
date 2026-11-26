@@ -1,6 +1,7 @@
 package com.kdt.fridge.groupmember.entity;
 
 import com.kdt.fridge.fridgeGroup.entity.FridgeGroup;
+import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -25,11 +26,11 @@ public class FridgeMember {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id" , nullable = false)
+    @JoinColumn(name = "group_id", nullable = false)
     private FridgeGroup fridge;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id" , nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
@@ -59,5 +60,10 @@ public class FridgeMember {
     // 권한 바꾸기
     public void changeRole(MemberRole role) {
         this.role = role;
+    }
+
+    // 관리자인지 확인
+    public boolean isAdmin() {
+        return this.role == MemberRole.ADMIN;
     }
 }

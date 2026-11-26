@@ -1,7 +1,7 @@
 package com.kdt.fridge.groupmember.dto;
 
 import com.kdt.fridge.groupmember.entity.FridgeMember;
-import com.kdt.fridge.groupmember.role.MemberRole;
+import com.kdt.fridge.groupmember.entity.MemberRole;
 
 import java.time.LocalDateTime;
 

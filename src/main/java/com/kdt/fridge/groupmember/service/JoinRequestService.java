@@ -8,7 +8,7 @@ import com.kdt.fridge.groupmember.dto.JoinRequestApproveResponse;
 import com.kdt.fridge.groupmember.dto.JoinRequestResponse;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.JoinRequest;
-import com.kdt.fridge.groupmember.role.JoinRequestStatus;
+import com.kdt.fridge.groupmember.entity.JoinRequestStatus;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
 import com.kdt.fridge.groupmember.repository.JoinRequestRepository;
 import com.kdt.fridge.user.entity.User;

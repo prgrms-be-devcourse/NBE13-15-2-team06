@@ -1,4 +1,4 @@
-package com.kdt.fridge.groupmember.role;
+package com.kdt.fridge.groupmember.entity;
 
 public enum MemberRole {
     ADMIN,

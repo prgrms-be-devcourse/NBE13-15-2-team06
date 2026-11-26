@@ -3,7 +3,7 @@ package com.kdt.fridge.groupmember.entity;
 import com.kdt.fridge.fridgeGroup.entity.FridgeGroup;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
-import com.kdt.fridge.groupmember.role.JoinRequestStatus;
+import com.kdt.fridge.groupmember.entity.JoinRequestStatus;
 import com.kdt.fridge.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

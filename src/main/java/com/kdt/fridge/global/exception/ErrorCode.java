@@ -57,7 +57,17 @@ public enum ErrorCode {
 
     //카카오 로그인 에러코드
     KAKAO_AUTH_FAILED(HttpStatus.BAD_REQUEST, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다. 다시 로그인해 주세요."),
-    KAKAO_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_SERVER_ERROR", "카카오 서버와 통신 중 오류가 발생했습니다.");
+    KAKAO_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_SERVER_ERROR", "카카오 서버와 통신 중 오류가 발생했습니다."),
+
+    // 구성원 관리 에러코드
+    ALREADY_FRIDGE_MEMBER(HttpStatus.CONFLICT, "ALREADY_FRIDGE_MEMBER", "이미 냉장고 구성원입니다."),
+    CANNOT_KICK_SELF(HttpStatus.BAD_REQUEST, "CANNOT_KICK_SELF", "자기 자신은 추방할 수 없습니다. 탈퇴를 이용해 주세요."),
+    DUPLICATE_JOIN_REQUEST(HttpStatus.CONFLICT, "DUPLICATE_JOIN_REQUEST", "이미 처리 대기 중인 참여 신청이 있습니다."),
+    INVALID_INVITE_CODE(HttpStatus.NOT_FOUND, "INVALID_INVITE_CODE", "유효하지 않은 초대 코드입니다."),
+    JOIN_REQUEST_ALREADY_PROCESSED(HttpStatus.CONFLICT, "JOIN_REQUEST_ALREADY_PROCESSED", "이미 처리된 참여 신청입니다."),
+    JOIN_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "JOIN_REQUEST_NOT_FOUND", "참여 신청을 찾을 수 없습니다."),
+    LAST_ADMIN_REQUIRED(HttpStatus.CONFLICT, "LAST_ADMIN_REQUIRED", "냉장고에는 관리자가 최소 1명 있어야 합니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "해당 구성원을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

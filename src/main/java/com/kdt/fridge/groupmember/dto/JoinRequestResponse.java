@@ -1,7 +1,7 @@
 package com.kdt.fridge.groupmember.dto;
 
 import com.kdt.fridge.groupmember.entity.JoinRequest;
-import com.kdt.fridge.groupmember.role.JoinRequestStatus;
+import com.kdt.fridge.groupmember.entity.JoinRequestStatus;
 
 import java.time.LocalDateTime;
 

@@ -4,7 +4,7 @@ import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.groupmember.dto.FridgeMemberResponse;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
-import com.kdt.fridge.groupmember.role.MemberRole;
+import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
