@@ -37,10 +37,41 @@ public class NotificationService {
     }
 
     //그룹 알림 설정 조회
-//    @Transactional(readOnly = true)
-//    public NotificationSettingResponse getGroupNotificationSetting(Long userId, Long groupId){
-//        NotificationSetting setting = notificationSettingRepository.findByUserIdAndGroupId(userId,groupId).orElseThrow(()-> new BusinessException(ErrorCode.));
-//
-//        return NotificationSettingResponse;
-//    }
+    @Transactional(readOnly = true)
+    public NotificationSettingResponse getGroupNotificationSetting(Long userId, Long groupId){
+        NotificationSetting setting = notificationSettingRepository.findByUserIdAndGroupId(userId,groupId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.NOTIFICATION_SETTING_NOT_FOUND));
+        return NotificationSettingResponse.from(setting);
+    }
+
+    //그룹 알림 설정 변경
+    @Transactional
+    public NotificationSettingResponse updateNotificationSetting(Long userId, Long groupId, NotificationSettingRequest settingRequest){
+        NotificationSetting setting = notificationSettingRepository.findByUserIdAndGroupId(userId,groupId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.NOTIFICATION_SETTING_NOT_FOUND));
+        setting.updateSetting(settingRequest.enabled(),settingRequest.receiveOthers());
+        return NotificationSettingResponse.from(setting);
+    }
+
+    //알림 시간 조회
+    @Transactional(readOnly = true)
+    public NotificationTimeResponse getNotificationTime(Long userId){
+        NotificationSetting setting = notificationSettingRepository.findFirstByUserId(userId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.NOTIFICATION_SETTING_NOT_FOUND));
+        return new NotificationTimeResponse(setting.getNotifyTime());
+    }
+
+    //알림 시간 변경
+    @Transactional
+    public NotificationTimeResponse updateNotificationTime(Long userId, NotificationTimeRequest settingRequest){
+        List<NotificationSetting> settings = notificationSettingRepository.findAllByUserId(userId);
+        if (settings.isEmpty()){
+            throw new BusinessException(ErrorCode.NOTIFICATION_SETTING_NOT_FOUND);
+        }
+        for (NotificationSetting setting : settings) {
+            setting.updateTime(settingRequest.notifyTime());
+        }
+        return new NotificationTimeResponse(settingRequest.notifyTime());
+    }
+
 }
