@@ -9,7 +9,7 @@ import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest.Status;
 import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -75,7 +75,12 @@ public class IngredientService {
         return IngredientResponse.from(savedIngredient);
     }
     @Transactional(readOnly = true)
-    public List<IngredientResponse> findAll(long groupId, long userId, String keyword, Integer expiringWithinDays)
+    public List<IngredientResponse> findAll(
+            long groupId,
+            long userId,
+            String keyword,
+            Integer expiringWithinDays,
+            String sort)
     {
         requireGroupMember(groupId, userId);
 
@@ -86,14 +91,15 @@ public class IngredientService {
         }
 
         String searchKeyword = keyword == null ? "" : keyword.strip();
+        Sort ingredientSort = parseIngredientSort(sort);
         List<Ingredient> ingredients;
 
         if(expiringWithinDays == null) {
             if (searchKeyword.isEmpty()) {
-                ingredients = ingredientRepository.findAllByGroupId(groupId);
+                ingredients = ingredientRepository.findAllByGroupId(groupId,ingredientSort);
             } else {
                 ingredients = ingredientRepository.findAllByGroupIdAndNameContaining(
-                        groupId, searchKeyword
+                        groupId, searchKeyword,ingredientSort
                 );
             }
         } else {
@@ -102,12 +108,12 @@ public class IngredientService {
 
             if(searchKeyword.isEmpty()){
                 ingredients = ingredientRepository.findAllByGroupIdAndExpiresAtBetween(
-                        groupId,today,endDate
+                        groupId,today,endDate,ingredientSort
                 );
             } else {
                 ingredients = ingredientRepository
                         .findAllByGroupIdAndNameContainingAndExpiresAtBetween(
-                                groupId,searchKeyword,today,endDate
+                                groupId,searchKeyword,today,endDate,ingredientSort
                         );
             }
         }
@@ -117,6 +123,40 @@ public class IngredientService {
         }
 
         return responses;
+    }
+
+    private Sort parseIngredientSort(String sort) {
+        if (sort == null) {
+            return Sort.unsorted();
+        }
+
+        String[] parts = sort.split(",", -1);
+        if (parts.length != 2) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,"정렬은 필드,방향 형식으로 입력해주세요."
+            );
+        }
+
+        String field = parts[0].strip();
+        String direction = parts[1].strip();
+
+        if (!"expiresAt".equals(field) && !"createdAt".equals(field)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,"정렬 필드는 expiresAt 또는 createdAt이어야 합니다."
+            );
+        }
+
+        if("asc".equals(direction)) {
+            return Sort.by(Sort.Direction.ASC,field);
+        }
+
+        if("desc".equals(direction)) {
+            return Sort.by(Sort.Direction.DESC,field);
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,"정렬 방향은 내림차순 혹은 오름차순이어야합니다."
+        );
     }
     @Transactional(readOnly = true)
     public IngredientResponse getDetail(long groupId,long ingredientId,long userId){

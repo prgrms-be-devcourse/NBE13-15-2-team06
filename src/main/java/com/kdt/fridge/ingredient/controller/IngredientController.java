@@ -48,15 +48,15 @@ public class IngredientController {
             @PathVariable("groupId") long groupId,
             @AuthenticationPrincipal Long userId,
             @RequestParam(name = "keyword",required = false)String keyword,
-            @RequestParam(name = "expiringWithinDays", required = false)
-            Integer expiringWithinDays
+            @RequestParam(name = "expiringWithinDays", required = false) Integer expiringWithinDays,
+            @RequestParam(name = "sort",required = false)String sort
     ){
         if(userId == null){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."
             );
         }
-        return ingredientService.findAll(groupId,userId,keyword,expiringWithinDays);
+        return ingredientService.findAll(groupId,userId,keyword,expiringWithinDays,sort);
     }
     @GetMapping("/{ingredientId}")
     public IngredientResponse getDetail(
