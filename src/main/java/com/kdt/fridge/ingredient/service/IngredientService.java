@@ -420,6 +420,45 @@ public class IngredientService {
         return IngredientResponse.from(ingredient);
     }
 
+    @Transactional
+    public IngredientResponse updateOwnership(
+            long groupId,
+            long ingredientId,
+            long userId,
+            boolean shared
+    ){
+        List<String> roles = jdbcTemplate.queryForList("""
+                SELECT role
+                FROM group_members
+                WHERE group_id = ? AND user_id = ? 
+                """,String.class,groupId,userId);
+
+        if(roles.isEmpty()) {
+            throw new BusinessException(ErrorCode.INGREDIENT_GROUP_MEMBER_REQUIRED);
+        }
+
+        Ingredient ingredient = ingredientRepository.findForUpdate(ingredientId,groupId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INGREDIENT_NOT_FOUND));
+
+        boolean isOwner = Long.valueOf(userId).equals(ingredient.getOwnerId());
+        boolean canUpdate = roles.contains("ADMIN")
+                || (!ingredient.isShared() && isOwner);
+
+        if(!canUpdate){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,"이 식재료의 공동 여부를 변경할 권한이 없습니다."
+            );
+        }
+
+        if(ingredient.isShared() != shared){
+            ingredient.updateShared(
+                    shared,LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+            );
+        }
+
+        return IngredientResponse.from(ingredient);
+    }
+
     private void requireGroupMember(long groupId, long userId) {
         Boolean member = jdbcTemplate.queryForObject("""
                 SELECT EXISTS (

@@ -123,4 +123,11 @@ public class Ingredient {
         this.memo = memo;
         this.updatedAt = now;
     }
+    public void updateShared(boolean shared,LocalDateTime now){
+        this.shared = shared;
+        this.updatedAt = now;
+    }
+
+    public boolean isShard() {
+    }
 }

@@ -9,6 +9,7 @@ import com.kdt.fridge.ingredient.dto.IngredientConsumeRequest;
 import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientMemoUpdateRequest;
+import com.kdt.fridge.ingredient.dto.IngredientOwnershipUpdateRequest;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -150,5 +151,19 @@ public class IngredientController {
         );
 
         return ApiResponse.of(HttpStatus.OK,"식재료 메모를 수정했습니다.",response);
+    }
+    @PatchMapping("/{ingredientId}/ownership")
+    public ApiResponse<IngredientResponse> updateOwnership(
+            @PathVariable("groupId") long groupId,
+            @PathVariable("ingredientId") long ingredientId,
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody IngredientOwnershipUpdateRequest request
+    ) {
+
+        IngredientResponse response = ingredientService.updateOwnership(
+                groupId,ingredientId,userId,request.shared()
+        );
+
+        return ApiResponse.of(HttpStatus.OK,"식재료 공동 여부를 변경했습니다.",response);
     }
 }
