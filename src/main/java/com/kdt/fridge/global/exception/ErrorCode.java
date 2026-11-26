@@ -53,7 +53,11 @@ public enum ErrorCode {
     //냉장고 관리 에러코드
     FRIDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIDGE_NOT_FOUND", "냉장고를 찾을 수 없습니다."),
     NOT_FRIDGE_MEMBER(HttpStatus.FORBIDDEN, "NOT_FRIDGE_MEMBER", "해당 냉장고의 구성원이 아닙니다."),
-    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN, "NOT_FRIDGE_ADMIN", "해당 냉장고의 관리자가 아닙니다.");
+    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN, "NOT_FRIDGE_ADMIN", "해당 냉장고의 관리자가 아닙니다."),
+
+    //카카오 로그인 에러코드
+    KAKAO_AUTH_FAILED(HttpStatus.BAD_REQUEST, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다. 다시 로그인해 주세요."),
+    KAKAO_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_SERVER_ERROR", "카카오 서버와 통신 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;

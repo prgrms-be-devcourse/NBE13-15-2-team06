@@ -149,3 +149,15 @@ Authorization: Bearer {{accessToken}}
 
 ### 로그아웃 - 토큰 없음 (401, AUTH_002)
 POST http://localhost:8080/api/v1/auth/logout
+
+### 카카오 로그인 (200)
+POST http://localhost:8080/api/v1/auth/kakao
+Content-Type: application/json
+
+{
+  "authorizationCode": "Gz_OSgqNO3cuqrdWneP-Be-gKyNdO_kJgNkD2YUTfktv0lhQE-IC1QAAAAQKDRlTAAABohVO7qxAPV-WDrAHcw"
+}
+
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+%}
