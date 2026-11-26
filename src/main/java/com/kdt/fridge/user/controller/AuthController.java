@@ -1,10 +1,7 @@
 package com.kdt.fridge.user.controller;
 
 import com.kdt.fridge.global.response.ApiResponse;
-import com.kdt.fridge.user.dto.LoginRequest;
-import com.kdt.fridge.user.dto.LoginResponse;
-import com.kdt.fridge.user.dto.SignupRequest;
-import com.kdt.fridge.user.dto.SignupResponse;
+import com.kdt.fridge.user.dto.*;
 import com.kdt.fridge.user.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +35,12 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/kakao")
+    public ResponseEntity<ApiResponse<KakaoLoginResponse>> kakaoLogin(
+            @Valid @RequestBody KakaoLoginRequest request) {
+        KakaoLoginResponse response = authService.kakaoLogin(request);
+        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "카카오 로그인에 성공했습니다.", response));
     }
 }

@@ -17,4 +17,10 @@ public interface FridgeMemberRepository extends JpaRepository<FridgeMember, Long
     Optional<FridgeMember> findByIdAndFridgeId(Long memberId, Long fridgeId);
 
     long countByFridgeIdAndRole(Long fridgeId, MemberRole role);
+
+    //내가 속한 냉장고 목록
+    List<FridgeMember> findByUserId(Long userId);
+
+    //냉장고의 구성원 수
+    long countByFridgeId(Long fridgeId);
 }

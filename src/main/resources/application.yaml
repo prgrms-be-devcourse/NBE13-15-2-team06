@@ -34,6 +34,11 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: 1800000   # 밀리초, 30분 (팀에서 만료 시간 확정 후 수정)
 
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
+
 logging:
   level:
     org.hibernate.SQL: debug

@@ -14,21 +14,50 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."),
 
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "DUPLLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "DUPLICATE_NICKNAME", "이미 사용 중인 닉네임입니다."),
 
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_NOT_FOUND", "존재하지 않는 알림입니다."),
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION_ACCESS_DENIED", "본인 알림이 아닙니다."),
+    NOTIFICATION_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_SETTING_NOT_FOUND", "알림 설정이 존재하지 않습니다."),
 
-    //구성원 에러
-    ALREADY_FRIDGE_MEMBER(HttpStatus.CONFLICT, "ALREADY_FRIDGE_MEMBER", "이미 냉장고 구성원입니다."),
-    CANNOT_KICK_SELF(HttpStatus.BAD_REQUEST, "CANNOT_KICK_SELF", "자기 자신은 추방할 수 없습니다. 탈퇴를 이용해 주세요."),
-    DUPLICATE_JOIN_REQUEST(HttpStatus.CONFLICT, "DUPLICATE_JOIN_REQUEST", "이미 처리 대기 중인 참여 신청이 있습니다."),
-    INVALID_INVITE_CODE(HttpStatus.NOT_FOUND, "INVALID_INVITE_CODE", "유효하지 않은 초대 코드입니다."),
-    JOIN_REQUEST_ALREADY_PROCESSED(HttpStatus.CONFLICT, "JOIN_REQUEST_ALREADY_PROCESSED", "이미 처리된 참여 신청입니다."),
-    JOIN_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "JOIN_REQUEST_NOT_FOUND", "참여 신청을 찾을 수 없습니다."),
-    LAST_ADMIN_REQUIRED(HttpStatus.CONFLICT, "LAST_ADMIN_REQUIRED", "냉장고에는 관리자가 최소 1명 있어야 합니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "해당 구성원을 찾을 수 없습니다."),
-    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN, "NOT_FRIDGE_ADMIN", "관리자만 할 수 있는 기능입니다."),
-    NOT_FRIDGE_MEMBER(HttpStatus.FORBIDDEN, "NOT_FRIDGE_MEMBER", "해당 냉장고의 구성원이 아닙니다.");
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "PASSWORD_MISMATCH", "현재 비밀번호가 일치하지 않습니다."),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "새 비밀번호가 현재 비밀번호와 같습니다."),
+    PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "PASSWORD_NOT_SET", "비밀번호가 없는 계정입니다."),
+
+    INGREDIENT_GROUP_MEMBER_REQUIRED(
+            HttpStatus.FORBIDDEN, "INGREDIENT_GROUP_MEMBER_REQUIRED",
+            "냉장고 그룹 구성원이 아닙니다."),
+    INGREDIENT_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "INGREDIENT_NOT_FOUND",
+            "식재료를 찾을 수 없습니다."),
+    INGREDIENT_CONSUMPTION_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_CONSUMPTION_FORBIDDEN",
+            "이 식재료를 소비할 권한이 없습니다."),
+    INGREDIENT_NOT_STORED(
+            HttpStatus.CONFLICT, "INGREDIENT_NOT_STORED",
+            "보관 중인 식재료만 소비할 수 있습니다."),
+    INGREDIENT_INSUFFICIENT_QUANTITY(
+            HttpStatus.CONFLICT, "INGREDIENT_INSUFFICIENT_QUANTITY",
+            "남은 수량보다 많이 소비할 수 없습니다."),
+    INGREDIENT_STATUS_UPDATE_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_STATUS_UPDATE_FORBIDDEN",
+            "이 식재료의 상태를 변경할 권한이 없습니다."),
+    INGREDIENT_INVALID_STATUS_TRANSITION(
+            HttpStatus.CONFLICT, "INGREDIENT_INVALID_STATUS_TRANSITION",
+            "현재 상태에서 요청한 상태로 변경할 수 없습니다."),
+    INGREDIENT_INVALID_STORED_QUANTITY(
+            HttpStatus.CONFLICT, "INGREDIENT_INVALID_STORED_QUANTITY",
+            "저장된 식재료 수량이 올바르지 않습니다."),
+
+    //냉장고 관리 에러코드
+    FRIDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIDGE_NOT_FOUND", "냉장고를 찾을 수 없습니다."),
+    NOT_FRIDGE_MEMBER(HttpStatus.FORBIDDEN, "NOT_FRIDGE_MEMBER", "해당 냉장고의 구성원이 아닙니다."),
+    NOT_FRIDGE_ADMIN(HttpStatus.FORBIDDEN, "NOT_FRIDGE_ADMIN", "해당 냉장고의 관리자가 아닙니다."),
+
+    //카카오 로그인 에러코드
+    KAKAO_AUTH_FAILED(HttpStatus.BAD_REQUEST, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다. 다시 로그인해 주세요."),
+    KAKAO_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "KAKAO_SERVER_ERROR", "카카오 서버와 통신 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;
