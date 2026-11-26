@@ -25,6 +25,8 @@ public enum ErrorCode {
     SAME_PASSWORD(HttpStatus.BAD_REQUEST, "SAME_PASSWORD", "새 비밀번호가 현재 비밀번호와 같습니다."),
     PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "PASSWORD_NOT_SET", "비밀번호가 없는 계정입니다."),
 
+//식재료 에러코드
+
     INGREDIENT_GROUP_MEMBER_REQUIRED(
             HttpStatus.FORBIDDEN, "INGREDIENT_GROUP_MEMBER_REQUIRED",
             "냉장고 그룹 구성원이 아닙니다."),
@@ -49,6 +51,34 @@ public enum ErrorCode {
     INGREDIENT_INVALID_STORED_QUANTITY(
             HttpStatus.CONFLICT, "INGREDIENT_INVALID_STORED_QUANTITY",
             "저장된 식재료 수량이 올바르지 않습니다."),
+    INGREDIENT_INVALID_EXPIRING_WITHIN_DAYS(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_EXPIRING_WITHIN_DAYS",
+            "유통기한 조회 일수는 0 이상이어야 합니다."),
+    INGREDIENT_INVALID_SORT_FORMAT(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_SORT_FORMAT",
+            "정렬은 필드,방향 형식으로 입력해주세요."),
+    INGREDIENT_INVALID_SORT_FIELD(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_SORT_FIELD",
+            "정렬 필드는 expiresAt 또는 createdAt이어야 합니다."),
+    INGREDIENT_INVALID_SORT_DIRECTION(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_SORT_DIRECTION",
+            "정렬 방향은 asc 또는 desc여야 합니다."),
+    INGREDIENT_UPDATE_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_UPDATE_FORBIDDEN",
+            "이 식재료를 수정할 권한이 없습니다."),
+    INGREDIENT_BLANK_NAME(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_BLANK_NAME",
+            "식재료 이름은 공백일 수 없습니다."),
+    INGREDIENT_INVALID_EXPIRATION_DATE(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_EXPIRATION_DATE",
+            "유통기한은 구매일보다 빠를 수 없습니다."),
+
+    INGREDIENT_MEMO_UPDATE_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_MEMO_UPDATE_FORBIDDEN",
+            "이 식재료의 메모를 수정할 권한이 없습니다."),
+    INGREDIENT_OWNERSHIP_UPDATE_FORBIDDEN(
+            HttpStatus.FORBIDDEN, "INGREDIENT_OWNERSHIP_UPDATE_FORBIDDEN",
+            "이 식재료의 공동 여부를 변경할 권한이 없습니다."),
 
     //냉장고 관리 에러코드
     FRIDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIDGE_NOT_FOUND", "냉장고를 찾을 수 없습니다."),
