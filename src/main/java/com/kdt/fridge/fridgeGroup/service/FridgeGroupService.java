@@ -71,11 +71,12 @@ public class FridgeGroupService {
 
     @Transactional
     public FridgeResponse updateName(Long userId, Long fridgeId, FridgeUpdateRequest request) {
-        FridgeMember member = fridgeMemberRepository.findByFridgeIdAndUserId(fridgeId, userId)
-                .orElseThrow(()-> new BusinessException(ErrorCode.NOT_FRIDGE_MEMBER));
 
         FridgeGroup fridge = fridgeGroupRepository.findById(fridgeId)
                 .orElseThrow(()-> new BusinessException(ErrorCode.FRIDGE_NOT_FOUND));
+
+        FridgeMember member = fridgeMemberRepository.findByFridgeIdAndUserId(fridgeId, userId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.NOT_FRIDGE_MEMBER));
 
         if(member.getRole() != MemberRole.ADMIN ){
             throw new BusinessException(ErrorCode.NOT_FRIDGE_ADMIN);
