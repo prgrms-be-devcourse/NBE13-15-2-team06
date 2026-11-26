@@ -75,20 +75,42 @@ public class IngredientService {
         return IngredientResponse.from(savedIngredient);
     }
     @Transactional(readOnly = true)
-    public List<IngredientResponse> findAll(long groupId, long userId, String keyword) {
+    public List<IngredientResponse> findAll(long groupId, long userId, String keyword, Integer expiringWithinDays)
+    {
         requireGroupMember(groupId, userId);
 
-        String searchKeyword = keyword == null ? "" : keyword.strip();
-
-        List<Ingredient> ingredients;
-        if (searchKeyword.isEmpty()) {
-            ingredients = ingredientRepository.findAllByGroupId(groupId);
-        } else {
-            ingredients = ingredientRepository.findAllByGroupIdAndNameContaining(
-                    groupId, searchKeyword
+        if(expiringWithinDays != null && expiringWithinDays < 0){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,"유통기한 조회 일수는 0 이상이어야 합니다."
             );
         }
 
+        String searchKeyword = keyword == null ? "" : keyword.strip();
+        List<Ingredient> ingredients;
+
+        if(expiringWithinDays == null) {
+            if (searchKeyword.isEmpty()) {
+                ingredients = ingredientRepository.findAllByGroupId(groupId);
+            } else {
+                ingredients = ingredientRepository.findAllByGroupIdAndNameContaining(
+                        groupId, searchKeyword
+                );
+            }
+        } else {
+            LocalDate today = LocalDate.now();
+            LocalDate endDate = today.plusDays(expiringWithinDays);
+
+            if(searchKeyword.isEmpty()){
+                ingredients = ingredientRepository.findAllByGroupIdAndExpiresAtBetween(
+                        groupId,today,endDate
+                );
+            } else {
+                ingredients = ingredientRepository
+                        .findAllByGroupIdAndNameContainingAndExpiresAtBetween(
+                                groupId,searchKeyword,today,endDate
+                        );
+            }
+        }
         List<IngredientResponse> responses = new ArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {
             responses.add(IngredientResponse.from(ingredient));
