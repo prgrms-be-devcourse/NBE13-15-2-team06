@@ -115,3 +115,16 @@ CREATE TABLE notification_settings (
                                        CONSTRAINT fk_notification_settings_group
                                            FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+CREATE TABLE join_requests (
+    id           BIGINT      NOT NULL AUTO_INCREMENT,
+    group_id     BIGINT      NOT NULL,
+    user_id      BIGINT      NOT NULL,
+    status       VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    requested_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decided_at   DATETIME    NULL,
+
+    PRIMARY KEY (id),
+    KEY idx_join_requests_group_status (group_id, status),
+    CONSTRAINT fk_join_requests_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id),
+    CONSTRAINT fk_join_requests_user  FOREIGN KEY (user_id)  REFERENCES users (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
