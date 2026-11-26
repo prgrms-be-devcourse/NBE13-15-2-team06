@@ -9,6 +9,7 @@ import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest.Status;
 import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -315,6 +316,40 @@ public class IngredientService {
                 ),
                 ingredientId
         );
+    }
+
+    @Transactional
+    public IngredientResponse updateMemo(
+            long groupId,
+            long ingredientId,
+            long userId,
+            String memo
+    ){
+        List<String> roles = jdbcTemplate.queryForList("""
+            SELECT role
+            FROM group_members
+            WHERE group_id = ? AND user_id = ?
+            """,String.class,groupId,userId);
+        if(roles.isEmpty()){
+            throw new BusinessException(ErrorCode.INGREDIENT_GROUP_MEMBER_REQUIRED);
+        }
+
+        Ingredient ingredient = ingredientRepository.findForUpdate(ingredientId,groupId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INGREDIENT_NOT_FOUND));
+
+        boolean isOwner = Long.valueOf(userId).equals(ingredient.getOwnerId());
+        boolean canUpdate = roles.contains("ADMIN")
+                || (!ingredient.isShared() && isOwner);
+
+        if(!canUpdate) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,"이 식재료의 메모를 수정할 권한이 없습니다."
+            );
+        }
+
+        ingredient.updateMemo(memo,LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+
+        return IngredientResponse.from(ingredient);
     }
 
     private void requireGroupMember(long groupId, long userId) {

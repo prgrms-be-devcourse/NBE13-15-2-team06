@@ -7,9 +7,10 @@ import com.kdt.fridge.ingredient.service.IngredientService;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientConsumeRequest;
 import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
+import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest;
+import com.kdt.fridge.ingredient.dto.IngredientMemoUpdateRequest;
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.response.ApiResponse;
-import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -129,5 +130,22 @@ public class IngredientController {
         List<IngredientHistoryResponse> histories =
                 ingredientService.getHistories(groupId,ingredientId,userId);
         return ApiResponse.of(HttpStatus.OK,"식재료 변경 이력을 조회했습니다.",histories);
+    }
+    @PatchMapping("/{ingredientId}/memo")
+    public ApiResponse<IngredientResponse> updateMemo(
+            @PathVariable("groupId") long groupId,
+            @PathVariable("ingredientId") long ingredientId,
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody IngredientMemoUpdateRequest request
+    ) {
+        if(userId == null){
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        IngredientResponse response = ingredientService.updateMemo(
+                groupId,ingredientId,userId,request.memo()
+        );
+
+        return ApiResponse.of(HttpStatus.OK,"식재료 메모를 수정했습니다.",response);
     }
 }
