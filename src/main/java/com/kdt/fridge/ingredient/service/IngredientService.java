@@ -75,17 +75,23 @@ public class IngredientService {
         return IngredientResponse.from(savedIngredient);
     }
     @Transactional(readOnly = true)
-    public List<IngredientResponse> findAll(long groupId, long userId) {
+    public List<IngredientResponse> findAll(long groupId, long userId, String keyword) {
         requireGroupMember(groupId, userId);
 
-        List<Ingredient> ingredients =
-                ingredientRepository.findVisibleIngredients(groupId, userId);
+        String searchKeyword = keyword == null ? "" : keyword.strip();
+
+        List<Ingredient> ingredients;
+        if (searchKeyword.isEmpty()) {
+            ingredients = ingredientRepository.findAllByGroupId(groupId);
+        } else {
+            ingredients = ingredientRepository.findAllByGroupIdAndNameContaining(
+                    groupId, searchKeyword
+            );
+        }
 
         List<IngredientResponse> responses = new ArrayList<>(ingredients.size());
-
         for (Ingredient ingredient : ingredients) {
-            IngredientResponse response = IngredientResponse.from(ingredient);
-            responses.add(response);
+            responses.add(IngredientResponse.from(ingredient));
         }
 
         return responses;

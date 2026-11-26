@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,4 +34,8 @@ public interface IngredientRepository extends JpaRepository<Ingredient,Long> {
             @Param("ingredientId")long ingredientId,
             @Param("groupId")long groupId
     );
+
+    List<Ingredient> findAllByGroupId(Long groupId);
+
+    List<Ingredient> findAllByGroupIdAndNameContaining(Long groupId,String keyword);
 }

@@ -46,14 +46,15 @@ public class IngredientController {
     @GetMapping
     public List<IngredientResponse>findAll(
             @PathVariable("groupId")long groupId,
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal Long userId,
+            @RequestParam(name = "keyword",required = false)String keyword
     ){
         if(userId == null){
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."
             );
         }
-        return ingredientService.findAll(groupId,userId);
+        return ingredientService.findAll(groupId,userId,keyword);
     }
     @GetMapping("/{ingredientId}")
     public IngredientResponse getDetail(
