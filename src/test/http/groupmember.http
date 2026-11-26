@@ -1,5 +1,255 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+@fridgeId = 1
 
 ###
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "minsu@test.com",
+  "password": "fridge1234!"
+}
+
+###
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "jiyoung@test.com",
+  "password": "fridge1234!"
+}
+
+###
+POST http://localhost:8080/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "chulsu@test.com",
+  "password": "fridge1234!"
+}
+
+###
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "minsu@test.com",
+  "password": "fridge1234!"
+}
+
+> {%
+    client.global.set("minsuToken", response.body.data.accessToken);
+%}
+
+###
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jiyoung@test.com",
+  "password": "fridge1234!"
+}
+
+> {%
+    client.global.set("jiyoungToken", response.body.data.accessToken);
+%}
+
+###
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "chulsu@test.com",
+  "password": "fridge1234!"
+}
+
+> {%
+    client.global.set("chulsuToken", response.body.data.accessToken);
+%}
+
+###
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "nickname": "민수"
+}
+
+###
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{jiyoungToken}}
+Content-Type: application/json
+
+{
+  "nickname": "지영"
+}
+
+###
+PATCH http://localhost:8080/api/v1/users/me/nickname
+Authorization: Bearer {{chulsuToken}}
+Content-Type: application/json
+
+{
+  "nickname": "철수"
+}
+
+###
+POST http://localhost:8080/api/v1/fridge-join-requests
+Authorization: Bearer {{jiyoungToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "TEST1234"
+}
+
+> {%
+    client.global.set("jiyoungRequestId", response.body.data.requestId);
+%}
+
+###
+POST http://localhost:8080/api/v1/fridge-join-requests
+Authorization: Bearer {{jiyoungToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "TEST1234"
+}
+
+###
+POST http://localhost:8080/api/v1/fridge-join-requests
+Authorization: Bearer {{chulsuToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "WRONG999"
+}
+
+###
+POST http://localhost:8080/api/v1/fridge-join-requests
+Authorization: Bearer {{chulsuToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "TEST1234"
+}
+
+> {%
+    client.global.set("chulsuRequestId", response.body.data.requestId);
+%}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
+Authorization: Bearer {{minsuToken}}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
+Authorization: Bearer {{jiyoungToken}}
+
+###
+POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{jiyoungRequestId}}/approve
+Authorization: Bearer {{minsuToken}}
+
+> {%
+    client.global.set("jiyoungMemberId", response.body.data.memberId);
+%}
+
+###
+POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{jiyoungRequestId}}/approve
+Authorization: Bearer {{minsuToken}}
+
+###
+POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{chulsuRequestId}}/reject
+Authorization: Bearer {{minsuToken}}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
+Authorization: Bearer {{jiyoungToken}}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
+Authorization: Bearer {{minsuToken}}
+
+> {%
+    var admins = response.body.data.filter(function (m) { return m.role === "ADMIN"; });
+    client.global.set("minsuMemberId", admins[0].memberId);
+%}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
+Authorization: Bearer {{chulsuToken}}
+
+###
+PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}/role
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+###
+PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}/role
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "role": "MEMBER"
+}
+
+###
+PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}/role
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "role": "MEMBER"
+}
+
+###
+PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}/role
+Authorization: Bearer {{jiyoungToken}}
+Content-Type: application/json
+
+{
+  "role": "MEMBER"
+}
+
+###
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}
+Authorization: Bearer {{minsuToken}}
+
+###
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}
+Authorization: Bearer {{minsuToken}}
+
+###
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}
+Authorization: Bearer {{minsuToken}}
+
+###
+POST http://localhost:8080/api/v1/fridge-join-requests
+Authorization: Bearer {{chulsuToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "TEST1234"
+}
+
+> {%
+    client.global.set("chulsuRequestId", response.body.data.requestId);
+%}
+
+###
+POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{chulsuRequestId}}/approve
+Authorization: Bearer {{minsuToken}}
+
+###
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/me
+Authorization: Bearer {{chulsuToken}}
+
+###
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/me
+Authorization: Bearer {{minsuToken}}
+
+###
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
