@@ -127,7 +127,4 @@ public class Ingredient {
         this.shared = shared;
         this.updatedAt = now;
     }
-
-    public boolean isShard() {
-    }
 }
