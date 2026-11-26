@@ -1,5 +1,6 @@
 package com.kdt.fridge.notification;
 
+import com.kdt.fridge.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name="notifications")
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Notification {
+public class Notification extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,9 +38,7 @@ public class Notification {
     @Column(nullable = false)
     private boolean isRead;
 
-    @Column(nullable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    // createdAt, updatedAt은 BaseTimeEntity에서 상속
 
     //생성자
     public Notification(Long userId, Long ingredientId, Long groupId, NotificationType type, String message) {
