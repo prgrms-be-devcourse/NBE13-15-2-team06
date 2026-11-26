@@ -4,7 +4,10 @@ import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
 import com.kdt.fridge.histories.dto.IngredientHistoryResponse;
+import com.kdt.fridge.histories.entity.IngredientHistory;
 import com.kdt.fridge.histories.repository.IngredientHistoryRepository;
+import com.kdt.fridge.ingredient.entity.Ingredient;
+import com.kdt.fridge.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,5 +31,12 @@ public class IngredientHistoryService {
         return ingredientHistoryRepository.findByIngredientGroupIdOrderByCreatedAtDesc(groupId).stream()
                 .map(IngredientHistoryResponse::from)
                 .toList();
+    }
+    // 식재료 변경 이력 기록. 호출하는 쪽의 트랜잭션에 참여한다.
+    @Transactional
+    public void record(Ingredient ingredient, User user, String action,
+                       Long quantityChange, String detail) {
+        ingredientHistoryRepository.save(
+                new IngredientHistory(ingredient, user, action, quantityChange, detail));
     }
 }
