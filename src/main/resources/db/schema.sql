@@ -89,6 +89,7 @@ CREATE TABLE notifications (
                                message VARCHAR(255) COLLATE utf8mb4_bin NULL,
                                is_read BOOLEAN NOT NULL DEFAULT FALSE,
                                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                               updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
                                PRIMARY KEY (id),
                                CONSTRAINT fk_notifications_user
@@ -96,7 +97,7 @@ CREATE TABLE notifications (
                                CONSTRAINT fk_notifications_group
                                    FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE,
                                CONSTRAINT fk_notifications_ingredient
-                                   FOREIGN KEY (ingredient_id) REFERENCES ingredients (id)
+                                   FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE notification_settings (
@@ -107,7 +108,6 @@ CREATE TABLE notification_settings (
                                        receive_others BOOLEAN DEFAULT TRUE NOT NULL,
                                        notify_time TIME NOT NULL DEFAULT '09:00:00',
 
-
                                        PRIMARY KEY (id),
                                        UNIQUE KEY uk_notification_settings_user_group (user_id, group_id),
                                        CONSTRAINT fk_notification_settings_user
@@ -115,6 +115,7 @@ CREATE TABLE notification_settings (
                                        CONSTRAINT fk_notification_settings_group
                                            FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 CREATE TABLE join_requests (
     id           BIGINT      NOT NULL AUTO_INCREMENT,
     group_id     BIGINT      NOT NULL,
