@@ -53,4 +53,8 @@ public class User extends BaseTimeEntity {
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    public static User createKakao(Long kakaoId) {
+        return new User(null, null, kakaoId);
+    }
 }
