@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class JoinRequestController {
-
     private final JoinRequestService joinRequestService;
 
     @PostMapping("/api/v1/fridge-join-requests")

@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/fridges/{fridgeId}/members")
 public class FridgeMemberController {
-
     private final FridgeMemberService fridgeMemberService;
 
     @GetMapping
