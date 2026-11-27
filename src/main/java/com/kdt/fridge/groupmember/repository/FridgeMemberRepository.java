@@ -68,11 +68,24 @@ public interface FridgeMemberRepository extends JpaRepository<FridgeMember, Long
 
     /**
      * 사용자가 속한 모든 냉장고의 구성원 레코드(내 냉장고 목록)를 조회한다.
+     * 냉장고를 fetch join으로 함께 가져와 멤버마다 냉장고를 따로 조회하지 않는다.
      */
-    List<FridgeMember> findByUserId(Long userId);
+    @Query("select m from FridgeMember m join fetch m.fridge where m.user.id = :userId")
+    List<FridgeMember> findWithFridgeByUserId(@Param("userId") Long userId);
 
     /**
      * 냉장고의 전체 구성원 수를 센다. 마지막 남은 구성원이 나갈 때 냉장고를 삭제할지 판단하는 데 쓴다.
      */
     long countByFridgeId(Long fridgeId);
+
+    // 여러 냉장고의 구성원 수를 쿼리 한 번으로 센다. 목록 조회에서 냉장고마다 count를 보내지 않기 위함.
+    @Query("select m.fridge.id as fridgeId, count(m) as memberCount "
+            + "from FridgeMember m where m.fridge.id in :fridgeIds group by m.fridge.id")
+    List<FridgeMemberCount> countByFridgeIds(@Param("fridgeIds") List<Long> fridgeIds);
+
+    interface FridgeMemberCount {
+        Long getFridgeId();
+
+        Long getMemberCount();
+    }
 }
