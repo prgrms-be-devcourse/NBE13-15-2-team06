@@ -6,6 +6,7 @@ import com.kdt.fridge.groupmember.dto.FridgeMemberResponse;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
+import com.kdt.fridge.notification.service.NotificationSettingManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.List;
 public class FridgeMemberService {
     private final FridgeMemberRepository fridgeMemberRepository;
     private final FridgeMemberValidator fridgeMemberValidator;
+    private final NotificationSettingManager notificationSettingManager;
 
     public List<FridgeMemberResponse> getMembers(Long fridgeId, Long loginUserId) {
         fridgeMemberValidator.getMember(fridgeId, loginUserId);
@@ -38,6 +40,7 @@ public class FridgeMemberService {
         }
 
         fridgeMemberRepository.delete(me);
+        notificationSettingManager.deleteSetting(loginUserId, fridgeId);
     }
 
     @Transactional
@@ -53,6 +56,7 @@ public class FridgeMemberService {
         }
 
         fridgeMemberRepository.delete(target);
+        notificationSettingManager.deleteSetting(target.getUser().getId(), fridgeId);
     }
 
     @Transactional
