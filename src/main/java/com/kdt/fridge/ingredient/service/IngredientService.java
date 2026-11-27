@@ -2,6 +2,7 @@ package com.kdt.fridge.ingredient.service;
 
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
+import com.kdt.fridge.histories.repository.IngredientHistoryRepository;
 import com.kdt.fridge.ingredient.dto.IngredientCreateRequest;
 import com.kdt.fridge.ingredient.dto.IngredientHistoryResponse;
 import com.kdt.fridge.ingredient.dto.IngredientResponse;
@@ -21,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import com.kdt.fridge.histories.repository.IngredientHistoryRepository;
 
 @Service
 public class IngredientService {
@@ -30,15 +32,19 @@ public class IngredientService {
     private final IngredientRepository ingredientRepository;
     private final JdbcTemplate jdbcTemplate;
     private final IngredientConsumptionRequestRepository consumptionRequestRepository;
+    private final IngredientHistoryRepository ingredientHistoryRepository;
 
     public IngredientService(
             IngredientRepository ingredientRepository,
             JdbcTemplate jdbcTemplate,
-            IngredientConsumptionRequestRepository consumptionRequestRepository
+            IngredientConsumptionRequestRepository consumptionRequestRepository,
+            IngredientHistoryRepository ingredientHistoryRepository
     ) {
         this.ingredientRepository = ingredientRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.consumptionRequestRepository = consumptionRequestRepository;
+        this.ingredientHistoryRepository = ingredientHistoryRepository;
+
     }
 
     // 식재료 등록 API — 그룹 구성원을 확인한 뒤 새 식재료를 보관 상태로 저장합니다.
@@ -303,22 +309,7 @@ public class IngredientService {
         requireGroupMember(groupId, userId);
         findIngredient(groupId, ingredientId);
 
-        return jdbcTemplate.query("""
-                SELECT id, user_id, action, quantity_change, detail, created_at
-                FROM ingredient_histories
-                WHERE ingredient_id = ?
-                ORDER BY created_at DESC, id DESC
-                """,
-                (rs, rowNum) -> new IngredientHistoryResponse(
-                        rs.getLong("id"),
-                        rs.getObject("user_id", Long.class),
-                        rs.getString("action"),
-                        rs.getObject("quantity_change", Long.class),
-                        rs.getString("detail"),
-                        rs.getObject("created_at", LocalDateTime.class)
-                ),
-                ingredientId
-        );
+        return ingredientHistoryRepository.findResponsesByIngredientId(ingredientId);
     }
 
     // 식재료 메모 수정 API — 관리자 또는 개인 식재료의 소유자가 메모를 수정합니다.
