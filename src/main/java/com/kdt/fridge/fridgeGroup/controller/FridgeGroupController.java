@@ -7,6 +7,8 @@ import com.kdt.fridge.fridgeGroup.dto.FridgeUpdateRequest;
 import com.kdt.fridge.fridgeGroup.dto.InviteCodeResponse;
 import com.kdt.fridge.fridgeGroup.service.FridgeGroupService;
 import com.kdt.fridge.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/fridges")
+@Tag(name = "Fridge", description = "냉장고 관리")
 public class FridgeGroupController {
 
     private final FridgeGroupService fridgeGroupService;
 
     // 냉장고 생성
+    @Operation(summary = "냉장고 생성",description = "냉장고 운영자 권한 부여, 초대 코드 발급")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<FridgeResponse> create(@AuthenticationPrincipal Long userId,
@@ -32,6 +36,7 @@ public class FridgeGroupController {
     }
 
     // 내 냉장고 목록
+    @Operation(summary = "냉장고 목록 조회", description = "유저가 소속 되어있는 냉장고 조회")
     @GetMapping
     public ApiResponse<List<FridgeSummaryResponse>> getMyFridges(@AuthenticationPrincipal Long userId) {
         List<FridgeSummaryResponse> response = fridgeGroupService.getMyAllFridges(userId);
@@ -39,6 +44,7 @@ public class FridgeGroupController {
     }
 
     // 냉장고 상세
+    @Operation(summary = "냉장고 상세 조회", description = "소속된 냉장고의 정보, 내 역할, 멤버 수 조회. 멤버가 아니면 조회 불가")
     @GetMapping("/{fridgeId}")
     public ApiResponse<FridgeResponse> getFridge(@AuthenticationPrincipal Long userId,
                                                  @PathVariable Long fridgeId) {
@@ -47,6 +53,7 @@ public class FridgeGroupController {
     }
 
     // 냉장고 이름 수정 (ADMIN)
+    @Operation(summary = "냉장고 이름 수정", description = "운영자(ADMIN)만 가능")
     @PatchMapping("/{fridgeId}")
     public ApiResponse<FridgeResponse> updateName(@AuthenticationPrincipal Long userId,
                                                   @PathVariable Long fridgeId,
@@ -56,6 +63,7 @@ public class FridgeGroupController {
     }
 
     // 초대 코드 조회 (ADMIN)
+    @Operation(summary = "초대 코드 조회", description = "운영자(ADMIN)만 가능")
     @GetMapping("/{fridgeId}/invite-code")
     public ApiResponse<InviteCodeResponse> getInviteCode(@AuthenticationPrincipal Long userId,
                                                          @PathVariable Long fridgeId) {
