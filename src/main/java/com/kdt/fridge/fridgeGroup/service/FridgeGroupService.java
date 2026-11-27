@@ -8,6 +8,7 @@ import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
+import com.kdt.fridge.notification.service.NotificationSettingManager;
 import com.kdt.fridge.user.entity.User;
 import com.kdt.fridge.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class FridgeGroupService {
     private final FridgeGroupRepository fridgeGroupRepository;
     private final FridgeMemberRepository fridgeMemberRepository;
     private final UserRepository userRepository;
+    private final NotificationSettingManager notificationSettingManager;
 
     //냉장고 생성
     //냉장고를 만든 사람일 admin이 되며, 냉장고와 멤버 저장을 한 트랜잭션으로 묶음
@@ -37,6 +39,7 @@ public class FridgeGroupService {
         FridgeGroup fridge = fridgeGroupRepository.save(new FridgeGroup(request.name().trim(), inviteCode));
 
         fridgeMemberRepository.save(FridgeMember.createAdmin(fridge, user));
+        notificationSettingManager.createSetting(userId, fridge.getId());
 
         return FridgeResponse.from(fridge, MemberRole.ADMIN.name(), 1L);
     }

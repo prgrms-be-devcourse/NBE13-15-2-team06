@@ -1,4 +1,7 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.dto;
+
+import com.kdt.fridge.notification.entity.NotificationType;
+import com.kdt.fridge.notification.entity.Notification;
 
 import java.time.LocalDateTime;
 

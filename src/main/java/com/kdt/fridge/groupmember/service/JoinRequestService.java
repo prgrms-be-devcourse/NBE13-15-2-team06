@@ -10,6 +10,7 @@ import com.kdt.fridge.groupmember.entity.JoinRequest;
 import com.kdt.fridge.groupmember.entity.JoinRequestStatus;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
 import com.kdt.fridge.groupmember.repository.JoinRequestRepository;
+import com.kdt.fridge.notification.service.NotificationSettingManager;
 import com.kdt.fridge.user.entity.User;
 import com.kdt.fridge.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class JoinRequestService {
     private final FridgeMemberRepository fridgeMemberRepository;
     private final UserRepository userRepository;
     private final FridgeMemberValidator fridgeMemberValidator;
+    private final NotificationSettingManager notificationSettingManager;
 
     /**
      * 초대 코드로 참여를 신청한다.
@@ -105,6 +107,7 @@ public class JoinRequestService {
             throw new BusinessException(ErrorCode.ALREADY_FRIDGE_MEMBER);
         }
 
+        notificationSettingManager.createSetting(joinRequest.getUser().getId(), fridgeId);
         return JoinRequestApproveResponse.of(joinRequest, member);
     }
 

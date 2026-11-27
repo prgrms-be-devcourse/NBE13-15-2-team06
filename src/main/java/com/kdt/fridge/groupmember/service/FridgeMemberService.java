@@ -7,6 +7,7 @@ import com.kdt.fridge.groupmember.dto.FridgeMemberResponse;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
+import com.kdt.fridge.notification.service.NotificationSettingManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class FridgeMemberService {
     private final FridgeMemberRepository fridgeMemberRepository;
     private final FridgeMemberValidator fridgeMemberValidator;
     private final FridgeGroupRepository fridgeGroupRepository;
+    private final NotificationSettingManager notificationSettingManager;
 
     /**
      * 냉장고 구성원 목록을 가입 순으로 조회한다.
@@ -65,6 +67,7 @@ public class FridgeMemberService {
         }
 
         fridgeMemberRepository.delete(me);
+        notificationSettingManager.deleteSetting(loginUserId, fridgeId);
     }
 
     /**
@@ -85,6 +88,7 @@ public class FridgeMemberService {
         }
 
         fridgeMemberRepository.delete(target);
+        notificationSettingManager.deleteSetting(target.getUser().getId(), fridgeId);
     }
 
     /**

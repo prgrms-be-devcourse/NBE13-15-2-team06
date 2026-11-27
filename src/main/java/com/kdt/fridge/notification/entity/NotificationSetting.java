@@ -1,4 +1,4 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

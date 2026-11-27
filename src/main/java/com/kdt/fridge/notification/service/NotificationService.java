@@ -1,18 +1,25 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.service;
 
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
+import com.kdt.fridge.notification.dto.*;
+import com.kdt.fridge.notification.entity.Notification;
+import com.kdt.fridge.notification.entity.NotificationSetting;
+import com.kdt.fridge.notification.entity.NotificationType;
+import com.kdt.fridge.notification.repository.NotificationRepository;
+import com.kdt.fridge.notification.repository.NotificationSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationService implements NotificationSettingManager {
     private final NotificationRepository notificationRepository;
     private final NotificationSettingRepository notificationSettingRepository;
     private final FridgeMemberRepository fridgeMemberRepository;
@@ -87,6 +94,30 @@ public class NotificationService {
             setting.updateTime(settingRequest.notifyTime());
         }
         return new NotificationTimeResponse(settingRequest.notifyTime());
+    }
+
+    //NotificationSettingManager의 매서드 구현
+    @Transactional
+    @Override
+    public void createSetting(Long userId, Long groupId) {
+        if (notificationSettingRepository.findByUserIdAndGroupId(userId,groupId).isPresent()){
+            return;
+        }
+        Optional<NotificationSetting> timeSetting = notificationSettingRepository.findFirstByUserId(userId);
+        NotificationSetting newSetting = notificationSettingRepository.save(new NotificationSetting(userId, groupId));
+        timeSetting.ifPresent(setting->newSetting.updateTime(setting.getNotifyTime()));
+    }
+    @Transactional
+    @Override
+    public void deleteSetting(Long userId, Long groupId) {
+        notificationSettingRepository.deleteByUserIdAndGroupId(userId, groupId);
+    }
+
+    //알림 생성 매서드
+    @Transactional
+    public void createNotification(Long userId, Long groupId, Long ingredientId, NotificationType type, String message){
+        Notification notification = new Notification(userId, groupId, ingredientId, type, message);
+        notificationRepository.save(notification);
     }
 
 }

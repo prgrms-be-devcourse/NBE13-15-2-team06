@@ -1,6 +1,8 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.controller;
 
 import com.kdt.fridge.global.response.ApiResponse;
+import com.kdt.fridge.notification.dto.*;
+import com.kdt.fridge.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
