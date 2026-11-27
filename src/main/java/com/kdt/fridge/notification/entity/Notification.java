@@ -1,13 +1,10 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.entity;
 
 import com.kdt.fridge.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name="notifications")
@@ -41,10 +38,10 @@ public class Notification extends BaseTimeEntity {
     // createdAt, updatedAt은 BaseTimeEntity에서 상속
 
     //생성자
-    public Notification(Long userId, Long ingredientId, Long groupId, NotificationType type, String message) {
+    public Notification(Long userId, Long groupId, Long ingredientId, NotificationType type, String message) {
         this.userId = userId;
-        this.ingredientId = ingredientId;
         this.groupId = groupId;
+        this.ingredientId = ingredientId;
         this.type = type;
         this.message = message;
         this.isRead = false;

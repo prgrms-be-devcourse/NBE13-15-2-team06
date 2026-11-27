@@ -1,5 +1,6 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.repository;
 
+import com.kdt.fridge.notification.entity.NotificationSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,4 +11,6 @@ public interface NotificationSettingRepository extends JpaRepository<Notificatio
     Optional<NotificationSetting> findByUserIdAndGroupId(Long userId, Long groupId);
     Optional<NotificationSetting> findFirstByUserId(Long userId);
     List<NotificationSetting> findAllByUserId(Long userId);
+
+    void deleteByUserIdAndGroupId(Long userId, Long groupId);
 }

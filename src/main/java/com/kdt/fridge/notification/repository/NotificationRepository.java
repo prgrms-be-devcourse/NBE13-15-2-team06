@@ -1,5 +1,6 @@
-package com.kdt.fridge.notification;
+package com.kdt.fridge.notification.repository;
 
+import com.kdt.fridge.notification.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
