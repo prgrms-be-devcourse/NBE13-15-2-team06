@@ -8,6 +8,7 @@ import com.kdt.fridge.global.exception.ErrorCode;
 import com.kdt.fridge.groupmember.entity.FridgeMember;
 import com.kdt.fridge.groupmember.entity.MemberRole;
 import com.kdt.fridge.groupmember.repository.FridgeMemberRepository;
+import com.kdt.fridge.groupmember.repository.FridgeMemberRepository.FridgeMemberCount;
 import com.kdt.fridge.notification.service.NotificationSettingManager;
 import com.kdt.fridge.user.entity.User;
 import com.kdt.fridge.user.repository.UserRepository;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -46,13 +49,23 @@ public class FridgeGroupService {
 
     //내가 속한 냉장고 목록
     //group_members에서 출발해 냉장고와 내 역할을 함께 얻는다.
+    //쿼리는 냉장고 수와 무관하게 2번: 멤버+냉장고 조회 1번, 구성원 수 집계 1번.
     @Transactional(readOnly = true)
     public List<FridgeSummaryResponse> getMyAllFridges(Long userId) {
-        return fridgeMemberRepository.findByUserId(userId).stream()
+        List<FridgeMember> members = fridgeMemberRepository.findWithFridgeByUserId(userId);
+
+        List<Long> fridgeIds = members.stream()
+                .map(member -> member.getFridge().getId())
+                .toList();
+
+        Map<Long, Long> memberCounts = fridgeMemberRepository.countByFridgeIds(fridgeIds).stream()
+                .collect(Collectors.toMap(FridgeMemberCount::getFridgeId, FridgeMemberCount::getMemberCount));
+
+        return members.stream()
                 .map(member -> FridgeSummaryResponse.from(
                         member.getFridge(),
                         member.getRole().name(),
-                        fridgeMemberRepository.countByFridgeId(member.getFridge().getId())))
+                        memberCounts.get(member.getFridge().getId())))
                 .toList();
     }
 
