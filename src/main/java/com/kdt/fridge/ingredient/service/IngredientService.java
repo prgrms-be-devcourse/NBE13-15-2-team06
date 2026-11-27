@@ -50,6 +50,14 @@ public class IngredientService {
     ) {
         requireGroupMember(groupId, userId);
 
+        LocalDate purchasedAt = request.purchasedAt();
+        LocalDate expiresAt = request.expiresAt();
+
+        if (purchasedAt != null && expiresAt != null
+                && expiresAt.isBefore(purchasedAt)){
+            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_EXPIRATION_DATE);
+        }
+
         Ingredient ingredient = new Ingredient(
                 groupId,
                 userId,
