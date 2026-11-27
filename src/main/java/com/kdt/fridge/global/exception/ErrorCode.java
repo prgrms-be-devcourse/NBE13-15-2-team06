@@ -38,6 +38,12 @@ public enum ErrorCode {
     INGREDIENT_CONSUMPTION_FORBIDDEN(
             HttpStatus.FORBIDDEN, "INGREDIENT_CONSUMPTION_FORBIDDEN",
             "이 식재료를 소비할 권한이 없습니다."),
+    INGREDIENT_INVALID_IDEMPOTENCY_KEY(
+            HttpStatus.BAD_REQUEST, "INGREDIENT_INVALID_IDEMPOTENCY_KEY",
+            "요청 키는 영문, 숫자, 점, 밑줄, 하이픈으로 이루어진 1~128자여야 합니다."),
+    INGREDIENT_IDEMPOTENCY_KEY_CONFLICT(
+            HttpStatus.CONFLICT, "INGREDIENT_IDEMPOTENCY_KEY_CONFLICT",
+            "같은 요청 키로 다른 수량을 소비할 수 없습니다."),
     INGREDIENT_NOT_STORED(
             HttpStatus.CONFLICT, "INGREDIENT_NOT_STORED",
             "보관 중인 식재료만 소비할 수 있습니다."),

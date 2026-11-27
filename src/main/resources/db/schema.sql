@@ -129,3 +129,22 @@ CREATE TABLE join_requests (
     CONSTRAINT fk_join_requests_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE,
     CONSTRAINT fk_join_requests_user  FOREIGN KEY (user_id)  REFERENCES users (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE  ingredient_consumption_requests (
+                                                        group_id BIGINT NOT NULL,
+                                                        ingredient_id BIGINT NOT NULL,
+                                                        user_id BIGINT NOT NULL,
+                                                        request_key VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+                                                        requested_quantity BIGINT NOT NULL,
+                                                        response_body JSON NOT NULL,
+
+                                                        PRIMARY KEY (group_id, ingredient_id, user_id, request_key),
+
+                                                        CONSTRAINT fk_consumption_requests_ingredient
+                                                            FOREIGN KEY (ingredient_id) REFERENCES ingredients (id)
+                                                                ON DELETE CASCADE,
+
+                                                        CONSTRAINT fk_consumption_requests_user
+                                                            FOREIGN KEY (user_id) REFERENCES users (id)
+                                                                ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

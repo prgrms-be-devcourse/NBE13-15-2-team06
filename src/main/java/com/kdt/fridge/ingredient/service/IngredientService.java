@@ -8,29 +8,37 @@ import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.dto.IngredientStatusUpdateRequest.Status;
 import com.kdt.fridge.ingredient.dto.IngredientUpdateRequest;
 import com.kdt.fridge.ingredient.entity.Ingredient;
+import com.kdt.fridge.ingredient.repository.IngredientConsumptionRequestRepository;
 import com.kdt.fridge.ingredient.repository.IngredientRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IngredientService {
 
+    private static final Pattern IDEMPOTENCY_KEY_PATTERN = Pattern.compile("[A-Za-z0-9._-]{1,128}");
+
     private final IngredientRepository ingredientRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final IngredientConsumptionRequestRepository consumptionRequestRepository;
 
     public IngredientService(
             IngredientRepository ingredientRepository,
-            JdbcTemplate jdbcTemplate
+            JdbcTemplate jdbcTemplate,
+            IngredientConsumptionRequestRepository consumptionRequestRepository
     ) {
         this.ingredientRepository = ingredientRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.consumptionRequestRepository = consumptionRequestRepository;
     }
 
     // 식재료 등록 API — 그룹 구성원을 확인한 뒤 새 식재료를 보관 상태로 저장합니다.
@@ -41,6 +49,14 @@ public class IngredientService {
             IngredientCreateRequest request
     ) {
         requireGroupMember(groupId, userId);
+
+        LocalDate purchasedAt = request.purchasedAt();
+        LocalDate expiresAt = request.expiresAt();
+
+        if (purchasedAt != null && expiresAt != null
+                && expiresAt.isBefore(purchasedAt)){
+            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_EXPIRATION_DATE);
+        }
 
         Ingredient ingredient = new Ingredient(
                 groupId,
@@ -54,8 +70,7 @@ public class IngredientService {
                 request.expiresAt(),
                 request.notifyDaysBefore(),
                 Status.STORED.name(),
-                request.memo(),
-                nowInSeconds()
+                request.memo()
         );
 
         Ingredient savedIngredient = ingredientRepository.save(ingredient);
@@ -170,26 +185,43 @@ public class IngredientService {
         }
 
         ingredient.updateBasicInfo(
-                name, unit, storageType, purchasedAt, expiresAt, notifyDaysBefore, nowInSeconds()
-        );
+                name, unit, storageType, purchasedAt, expiresAt, notifyDaysBefore);
         return IngredientResponse.from(ingredient);
     }
 
-    // 식재료 일부 소비 API — 요청 수량을 차감하고 소비 이력을 저장합니다.
-    @Transactional
+    // 잠금 대기 후 조회한 요청 기록에 먼저 끝난 트랜잭션의 커밋이 반영되어야 합니다.
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public IngredientResponse consume(
             long groupId,
             long ingredientId,
             long userId,
-            long amount
+            long amount,
+            String idempotencyKey
     ) {
         if (amount <= 0) {
             throw new BusinessException(ErrorCode.INVALID_INPUT);
         }
 
+        if (idempotencyKey != null && !IDEMPOTENCY_KEY_PATTERN.matcher(idempotencyKey).matches()) {
+            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_IDEMPOTENCY_KEY);
+        }
+
         requireGroupMember(groupId, userId);
         Ingredient ingredient = findIngredientForUpdate(groupId, ingredientId);
         requireConsumptionPermission(ingredient, userId);
+
+        if (idempotencyKey != null) {
+            var previousRequest = consumptionRequestRepository.find(
+                    groupId, ingredientId, userId, idempotencyKey
+            );
+            if (previousRequest.isPresent()) {
+                var completedRequest = previousRequest.get();
+                if (completedRequest.requestedQuantity() != amount) {
+                    throw new BusinessException(ErrorCode.INGREDIENT_IDEMPOTENCY_KEY_CONFLICT);
+                }
+                return completedRequest.response();
+            }
+        }
 
         if (!Status.STORED.name().equals(ingredient.getStatus())) {
             throw new BusinessException(ErrorCode.INGREDIENT_NOT_STORED);
@@ -204,10 +236,17 @@ public class IngredientService {
         LocalDateTime now = nowInSeconds();
 
         // 엔티티에 남은 수량을 전달하고, 이력에는 줄어든 양을 음수로 기록합니다.
-        ingredient.applyConsumption(remainingQuantity, now);
+        ingredient.applyConsumption(remainingQuantity);
         saveQuantityHistory(ingredientId, userId, "CONSUME", -amount, now);
 
-        return IngredientResponse.from(ingredient);
+
+        ingredientRepository.flush();
+        IngredientResponse response = IngredientResponse.from(ingredient);
+        if (idempotencyKey != null) {
+            consumptionRequestRepository.save(
+                    groupId, ingredientId, userId, idempotencyKey, amount, response);
+        }
+        return response;
     }
 
     // 식재료 상태 변경 API — 보관 중인 식재료를 소비 또는 폐기 처리하고 이력을 저장합니다.
@@ -250,10 +289,10 @@ public class IngredientService {
         String action;
 
         if (targetStatus == Status.CONSUMED) {
-            ingredient.applyConsumption(0L, now);
+            ingredient.applyConsumption(0L);
             action = "CONSUME";
         } else {
-            ingredient.discard(now);
+            ingredient.discard();
             action = "DISCARD";
         }
 
@@ -304,7 +343,8 @@ public class IngredientService {
             throw new BusinessException(ErrorCode.INGREDIENT_MEMO_UPDATE_FORBIDDEN);
         }
 
-        ingredient.updateMemo(memo, nowInSeconds());
+        ingredient.updateMemo(memo);
+        ingredientRepository.flush();
         return IngredientResponse.from(ingredient);
     }
 
@@ -324,7 +364,7 @@ public class IngredientService {
         }
 
         if (ingredient.isShared() != shared) {
-            ingredient.updateShared(shared, nowInSeconds());
+            ingredient.updateShared(shared);
         }
 
         return IngredientResponse.from(ingredient);
