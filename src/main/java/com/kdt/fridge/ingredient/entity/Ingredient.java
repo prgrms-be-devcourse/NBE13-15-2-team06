@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import com.kdt.fridge.global.entity.BaseTimeEntity;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "ingredients")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Ingredient {
+public class Ingredient extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +40,7 @@ public class Ingredient {
     @Column(name = "purchased_at")
     private LocalDate purchasedAt;
 
-    @Column(name  = "expires_at")
+    @Column(name = "expires_at")
     private LocalDate expiresAt;
 
     @Column(name = "notify_days_before")
@@ -51,12 +51,6 @@ public class Ingredient {
 
     @Column(length = 255)
     private String memo;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     public Ingredient(
             Long groupId,
@@ -70,8 +64,7 @@ public class Ingredient {
             LocalDate expiresAt,
             Integer notifyDaysBefore,
             String status,
-            String memo,
-            LocalDateTime createdAt
+            String memo
     ){
         this.groupId = groupId;
         this.ownerId = ownerId;
@@ -80,13 +73,11 @@ public class Ingredient {
         this.unit = unit;
         this.storageType = storageType;
         this.shared = shared;
-        this.purchasedAt = purchasedAt;
-        this.expiresAt = expiresAt;
         this.notifyDaysBefore = notifyDaysBefore;
         this.status = status;
         this.memo = memo;
-        this.createdAt = createdAt;
-        this.updatedAt = createdAt;
+        this.purchasedAt = purchasedAt;
+        this.expiresAt = expiresAt;
 
     }
     public void updateBasicInfo(
@@ -95,8 +86,7 @@ public class Ingredient {
             String storageType,
             LocalDate purchasedAt,
             LocalDate expiresAt,
-            Integer notifyDaysBefore,
-            LocalDateTime updatedAt
+            Integer notifyDaysBefore
     ){
         this.name = name;
         this.unit = unit;
@@ -104,27 +94,22 @@ public class Ingredient {
         this.purchasedAt = purchasedAt;
         this.expiresAt = expiresAt;
         this.notifyDaysBefore = notifyDaysBefore;
-        this.updatedAt = updatedAt;
     }
-    public void applyConsumption(long remainingQuantity,LocalDateTime now){
+    public void applyConsumption(long remainingQuantity){
         this.quantity = remainingQuantity;
-        this.updatedAt = now;
 
         if(remainingQuantity == 0) {
             this.status = "CONSUMED";
         }
     }
-    public void discard(LocalDateTime now) {
+    public void discard() {
         this.quantity = 0L;
         this.status = "DISCARDED";
-        this.updatedAt = now;
     }
-    public void updateMemo(String memo,LocalDateTime now){
+    public void updateMemo(String memo){
         this.memo = memo;
-        this.updatedAt = now;
     }
-    public void updateShared(boolean shared,LocalDateTime now){
+    public void updateShared(boolean shared){
         this.shared = shared;
-        this.updatedAt = now;
     }
 }

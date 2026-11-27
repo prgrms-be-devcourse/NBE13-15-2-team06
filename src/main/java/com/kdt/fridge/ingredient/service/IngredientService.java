@@ -70,8 +70,7 @@ public class IngredientService {
                 request.expiresAt(),
                 request.notifyDaysBefore(),
                 Status.STORED.name(),
-                request.memo(),
-                nowInSeconds()
+                request.memo()
         );
 
         Ingredient savedIngredient = ingredientRepository.save(ingredient);
@@ -186,8 +185,7 @@ public class IngredientService {
         }
 
         ingredient.updateBasicInfo(
-                name, unit, storageType, purchasedAt, expiresAt, notifyDaysBefore, nowInSeconds()
-        );
+                name, unit, storageType, purchasedAt, expiresAt, notifyDaysBefore);
         return IngredientResponse.from(ingredient);
     }
 
@@ -238,12 +236,15 @@ public class IngredientService {
         LocalDateTime now = nowInSeconds();
 
         // 엔티티에 남은 수량을 전달하고, 이력에는 줄어든 양을 음수로 기록합니다.
-        ingredient.applyConsumption(remainingQuantity, now);
+        ingredient.applyConsumption(remainingQuantity);
         saveQuantityHistory(ingredientId, userId, "CONSUME", -amount, now);
 
+
+        ingredientRepository.flush();
         IngredientResponse response = IngredientResponse.from(ingredient);
         if (idempotencyKey != null) {
-            consumptionRequestRepository.save(groupId, ingredientId, userId, idempotencyKey, amount, response);
+            consumptionRequestRepository.save(
+                    groupId, ingredientId, userId, idempotencyKey, amount, response);
         }
         return response;
     }
@@ -288,10 +289,10 @@ public class IngredientService {
         String action;
 
         if (targetStatus == Status.CONSUMED) {
-            ingredient.applyConsumption(0L, now);
+            ingredient.applyConsumption(0L);
             action = "CONSUME";
         } else {
-            ingredient.discard(now);
+            ingredient.discard();
             action = "DISCARD";
         }
 
@@ -342,7 +343,8 @@ public class IngredientService {
             throw new BusinessException(ErrorCode.INGREDIENT_MEMO_UPDATE_FORBIDDEN);
         }
 
-        ingredient.updateMemo(memo, nowInSeconds());
+        ingredient.updateMemo(memo);
+        ingredientRepository.flush();
         return IngredientResponse.from(ingredient);
     }
 
@@ -362,7 +364,7 @@ public class IngredientService {
         }
 
         if (ingredient.isShared() != shared) {
-            ingredient.updateShared(shared, nowInSeconds());
+            ingredient.updateShared(shared);
         }
 
         return IngredientResponse.from(ingredient);
