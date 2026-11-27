@@ -36,7 +36,7 @@ CREATE TABLE group_members(
 
                               PRIMARY KEY (id),
                               UNIQUE KEY uk_group_members_group_user (group_id, user_id),
-                              CONSTRAINT fk_group_members_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id),
+                              CONSTRAINT fk_group_members_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE,
                               CONSTRAINT fk_group_members_user FOREIGN KEY (user_id) REFERENCES users(id)
 )ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
@@ -59,7 +59,7 @@ CREATE TABLE ingredients (
 
                              PRIMARY KEY (id),
                              CONSTRAINT fk_ingredients_group
-                                 FOREIGN KEY (group_id) REFERENCES fridge_groups(id),
+                                 FOREIGN KEY (group_id) REFERENCES fridge_groups(id) ON DELETE CASCADE,
                              CONSTRAINT fk_ingredients_owner
                                  FOREIGN KEY (owner_id) REFERENCES users(id)
 )ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -75,7 +75,7 @@ CREATE TABLE ingredient_histories (
 
                                       PRIMARY KEY (id),
                                       CONSTRAINT fk_ingredient_histories_ingredient
-                                          FOREIGN KEY (ingredient_id) REFERENCES ingredients (id),
+                                          FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE,
                                       CONSTRAINT fk_ingredient_histories_user
                                           FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -126,6 +126,6 @@ CREATE TABLE join_requests (
 
     PRIMARY KEY (id),
     KEY idx_join_requests_group_status (group_id, status),
-    CONSTRAINT fk_join_requests_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id),
+    CONSTRAINT fk_join_requests_group FOREIGN KEY (group_id) REFERENCES fridge_groups (id) ON DELETE CASCADE,
     CONSTRAINT fk_join_requests_user  FOREIGN KEY (user_id)  REFERENCES users (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
