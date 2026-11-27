@@ -1,6 +1,10 @@
-@fridgeId = 1
+### =========================================================
+### 구성원 관리 API 테스트 (위에서부터 순서대로 ▶ 실행)
+### 등장인물: 민수(관리자), 지영, 철수
+### 준비 SQL 필요 없음. 서버만 켜져 있으면 됨
+### =========================================================
 
-###
+### 0-1. 회원가입 3명 (이미 가입돼 있으면 409여도 괜찮음)
 POST http://localhost:8080/api/v1/auth/signup
 Content-Type: application/json
 
@@ -27,7 +31,7 @@ Content-Type: application/json
   "password": "fridge1234!"
 }
 
-###
+### 0-2. 로그인 3명 → 토큰 저장 (반드시 200이어야 함)
 POST http://localhost:8080/api/v1/auth/login
 Content-Type: application/json
 
@@ -66,7 +70,7 @@ Content-Type: application/json
     client.global.set("chulsuToken", response.body.data.accessToken);
 %}
 
-###
+### 0-3. 닉네임 설정 (이미 설정했으면 409여도 괜찮음)
 PATCH http://localhost:8080/api/v1/users/me/nickname
 Authorization: Bearer {{minsuToken}}
 Content-Type: application/json
@@ -93,29 +97,50 @@ Content-Type: application/json
   "nickname": "철수"
 }
 
-###
+### 0-4. 민수가 냉장고 생성 → 201, 민수는 자동으로 ADMIN
+POST http://localhost:8080/api/v1/fridges
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "name": "테스트 냉장고"
+}
+
+> {%
+    client.global.set("fridgeId", response.body.data.id);
+%}
+
+### 0-5. 초대 코드 조회 (민수) → 200
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/invite-code
+Authorization: Bearer {{minsuToken}}
+
+> {%
+    client.global.set("inviteCode", response.body.data.inviteCode);
+%}
+
+### 5. 참여 신청 (지영) → 201, status PENDING
 POST http://localhost:8080/api/v1/fridge-join-requests
 Authorization: Bearer {{jiyoungToken}}
 Content-Type: application/json
 
 {
-  "inviteCode": "TEST1234"
+  "inviteCode": "{{inviteCode}}"
 }
 
 > {%
     client.global.set("jiyoungRequestId", response.body.data.requestId);
 %}
 
-###
+### 5-1. 같은 신청 한 번 더 (지영) → 409 DUPLICATE_JOIN_REQUEST
 POST http://localhost:8080/api/v1/fridge-join-requests
 Authorization: Bearer {{jiyoungToken}}
 Content-Type: application/json
 
 {
-  "inviteCode": "TEST1234"
+  "inviteCode": "{{inviteCode}}"
 }
 
-###
+### 5-2. 없는 초대 코드 → 404 INVALID_INVITE_CODE
 POST http://localhost:8080/api/v1/fridge-join-requests
 Authorization: Bearer {{chulsuToken}}
 Content-Type: application/json
@@ -124,28 +149,28 @@ Content-Type: application/json
   "inviteCode": "WRONG999"
 }
 
-###
+### 5-3. 참여 신청 (철수) → 201
 POST http://localhost:8080/api/v1/fridge-join-requests
 Authorization: Bearer {{chulsuToken}}
 Content-Type: application/json
 
 {
-  "inviteCode": "TEST1234"
+  "inviteCode": "{{inviteCode}}"
 }
 
 > {%
     client.global.set("chulsuRequestId", response.body.data.requestId);
 %}
 
-###
+### 6. 신청자 목록 (민수, 관리자) → 200, 지영·철수 2건
 GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
 Authorization: Bearer {{minsuToken}}
 
-###
+### 6-1. 신청자 목록 (지영, 아직 구성원 아님) → 403 NOT_FRIDGE_MEMBER
 GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
 Authorization: Bearer {{jiyoungToken}}
 
-###
+### 7. 신청 수락 (민수가 지영을) → 200, APPROVED + memberId
 POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{jiyoungRequestId}}/approve
 Authorization: Bearer {{minsuToken}}
 
@@ -153,19 +178,19 @@ Authorization: Bearer {{minsuToken}}
     client.global.set("jiyoungMemberId", response.body.data.memberId);
 %}
 
-###
+### 7-1. 같은 신청 또 수락 → 409 JOIN_REQUEST_ALREADY_PROCESSED
 POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{jiyoungRequestId}}/approve
 Authorization: Bearer {{minsuToken}}
 
-###
+### 8. 신청 거절 (민수가 철수를) → 200, REJECTED
 POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{chulsuRequestId}}/reject
 Authorization: Bearer {{minsuToken}}
 
-###
+### 6-2. 신청자 목록 (지영, 구성원이지만 관리자 아님) → 403 NOT_FRIDGE_ADMIN
 GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests
 Authorization: Bearer {{jiyoungToken}}
 
-###
+### 1. 구성원 조회 (민수) → 200, 민수·지영 2명 (가입 순)
 GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
 Authorization: Bearer {{minsuToken}}
 
@@ -174,11 +199,11 @@ Authorization: Bearer {{minsuToken}}
     client.global.set("minsuMemberId", admins[0].memberId);
 %}
 
-###
+### 1-1. 구성원 조회 (철수, 거절당해서 구성원 아님) → 403 NOT_FRIDGE_MEMBER
 GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
 Authorization: Bearer {{chulsuToken}}
 
-###
+### 4. 권한 부여: 지영을 ADMIN으로 → 200
 PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}/role
 Authorization: Bearer {{minsuToken}}
 Content-Type: application/json
@@ -187,7 +212,7 @@ Content-Type: application/json
   "role": "ADMIN"
 }
 
-###
+### 4-1. 권한 회수: 지영을 MEMBER로 → 200
 PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}/role
 Authorization: Bearer {{minsuToken}}
 Content-Type: application/json
@@ -196,7 +221,7 @@ Content-Type: application/json
   "role": "MEMBER"
 }
 
-###
+### 4-2. 마지막 관리자(민수)가 자기 권한 회수 → 409 LAST_ADMIN_REQUIRED
 PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}/role
 Authorization: Bearer {{minsuToken}}
 Content-Type: application/json
@@ -205,7 +230,7 @@ Content-Type: application/json
   "role": "MEMBER"
 }
 
-###
+### 4-3. 관리자 아닌 지영이 권한 변경 시도 → 403 NOT_FRIDGE_ADMIN
 PATCH http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}/role
 Authorization: Bearer {{jiyoungToken}}
 Content-Type: application/json
@@ -214,42 +239,82 @@ Content-Type: application/json
   "role": "MEMBER"
 }
 
-###
+### 2-0. 관리자 민수 탈퇴 시도 (지영은 일반 구성원) → 409 LAST_ADMIN_REQUIRED
+DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/me
+Authorization: Bearer {{minsuToken}}
+
+### 3. 자기 자신 추방 (민수) → 400 CANNOT_KICK_SELF
 DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{minsuMemberId}}
 Authorization: Bearer {{minsuToken}}
 
-###
+### 3-1. 구성원 추방 (민수가 지영을) → 204
 DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}
 Authorization: Bearer {{minsuToken}}
 
-###
+### 3-2. 이미 나간 지영 다시 추방 → 404 MEMBER_NOT_FOUND
 DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/{{jiyoungMemberId}}
 Authorization: Bearer {{minsuToken}}
 
-###
+### 2 준비. 철수 다시 신청 (거절 기록만 있으니 새로 신청 가능) → 201
 POST http://localhost:8080/api/v1/fridge-join-requests
 Authorization: Bearer {{chulsuToken}}
 Content-Type: application/json
 
 {
-  "inviteCode": "TEST1234"
+  "inviteCode": "{{inviteCode}}"
 }
 
 > {%
     client.global.set("chulsuRequestId", response.body.data.requestId);
 %}
 
-###
+### 2 준비. 민수가 철수 수락 → 200
 POST http://localhost:8080/api/v1/fridges/{{fridgeId}}/join-requests/{{chulsuRequestId}}/approve
 Authorization: Bearer {{minsuToken}}
 
-###
+### 2. 그룹 탈퇴 (철수, 일반 구성원) → 204
 DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/me
 Authorization: Bearer {{chulsuToken}}
 
-###
+### 2-1. 마지막 구성원(민수) 탈퇴 → 204, 냉장고도 함께 삭제
 DELETE http://localhost:8080/api/v1/fridges/{{fridgeId}}/members/me
 Authorization: Bearer {{minsuToken}}
 
-###
-GET http://localhost:8080/api/v1/fridges/{{fridgeId}}/members
+### 2-2. 삭제된 냉장고 조회 → 404 FRIDGE_NOT_FOUND
+GET http://localhost:8080/api/v1/fridges/{{fridgeId}}
+Authorization: Bearer
+
+
+### 민수가 냉장고 생성 → 201
+POST http://localhost:8080/api/v1/fridges
+Authorization: Bearer {{minsuToken}}
+Content-Type: application/json
+
+{
+  "name": "삭제 테스트 냉장고"
+}
+
+> {%
+    client.global.set("delFridgeId", response.body.data.id);
+%}
+
+### 냉장고 삭제 → 204
+DELETE http://localhost:8080/api/v1/fridges/{{delFridgeId}}
+Authorization: Bearer {{minsuToken}}
+
+### 삭제된 냉장고 조회 → 404
+GET http://localhost:8080/api/v1/fridges/{{delFridgeId}}
+Authorization: Bearer {{minsuToken}}
+
+
+### 마지막 구성원 탈퇴 → 냉장고도 삭제 → 204
+DELETE http://localhost:8080/api/v1/fridges/2/members/me
+Authorization: Bearer {{minsuToken}}
+
+### 삭제 확인 → 404 FRIDGE_NOT_FOUND
+GET http://localhost:8080/api/v1/fridges/2
+Authorization: Bearer {{minsuToken}}
+
+### 2번 냉장고 나가기 (민수 혼자라서 냉장고도 삭제) → 204
+DELETE http://localhost:8080/api/v1/fridges/2/members/me
+Authorization: Bearer {{minsuToken}}
