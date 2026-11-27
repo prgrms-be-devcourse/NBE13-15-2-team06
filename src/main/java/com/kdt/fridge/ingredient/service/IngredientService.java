@@ -52,11 +52,7 @@ public class IngredientService {
 
         LocalDate purchasedAt = request.purchasedAt();
         LocalDate expiresAt = request.expiresAt();
-
-        if (purchasedAt != null && expiresAt != null
-                && expiresAt.isBefore(purchasedAt)){
-            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_EXPIRATION_DATE);
-        }
+        validateExpirationDate(purchasedAt, expiresAt);
 
         Ingredient ingredient = new Ingredient(
                 groupId,
@@ -176,12 +172,9 @@ public class IngredientService {
                 ? ingredient.getNotifyDaysBefore()
                 : request.notifyDaysBefore();
 
-        // 날짜가 수정되면 기존 값과 새 요청 값을 합친 최종 날짜를 비교합니다.
-        if ((request.purchasedAt() != null || request.expiresAt() != null)
-                && purchasedAt != null
-                && expiresAt != null
-                && expiresAt.isBefore(purchasedAt)) {
-            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_EXPIRATION_DATE);
+        // 기존 값과 요청 값을 합친 뒤,날짜를 수정하는 요청인지 확인하고 호출합니다.
+        if(request.purchasedAt() != null || request.expiresAt() != null){
+            validateExpirationDate(purchasedAt,expiresAt);
         }
 
         ingredient.updateBasicInfo(
@@ -468,6 +461,12 @@ public class IngredientService {
                     (ingredient_id, user_id, action, quantity_change, created_at)
                 VALUES (?, ?, ?, ?, ?)
                 """, ingredientId, userId, action, quantityChange, createdAt);
+    }
+
+    private void validateExpirationDate(LocalDate purchasedAt,LocalDate expiresAt) {
+        if (purchasedAt != null && expiresAt != null && expiresAt.isBefore(purchasedAt)) {
+            throw new BusinessException(ErrorCode.INGREDIENT_INVALID_EXPIRATION_DATE);
+        }
     }
 
     private LocalDateTime nowInSeconds() {
