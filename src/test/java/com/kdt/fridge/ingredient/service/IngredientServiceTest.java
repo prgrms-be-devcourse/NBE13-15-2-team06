@@ -2,6 +2,7 @@ package com.kdt.fridge.ingredient.service;
 
 import com.kdt.fridge.global.exception.BusinessException;
 import com.kdt.fridge.global.exception.ErrorCode;
+import com.kdt.fridge.histories.repository.IngredientHistoryRepository;
 import com.kdt.fridge.ingredient.dto.IngredientResponse;
 import com.kdt.fridge.ingredient.entity.Ingredient;
 import com.kdt.fridge.ingredient.repository.IngredientConsumptionRequestRepository;
@@ -44,17 +45,24 @@ class IngredientServiceTest {
     @Mock
     private IngredientConsumptionRequestRepository consumptionRequestRepository;
 
+    @Mock
+    private IngredientHistoryRepository ingredientHistoryRepository;
+
     private IngredientService ingredientService;
     private Ingredient ingredient;
 
     @BeforeEach
     void setUp() {
-        ingredientService = new IngredientService(ingredientRepository, jdbcTemplate, consumptionRequestRepository);
+        ingredientService = new IngredientService(
+                ingredientRepository,
+                jdbcTemplate,
+                consumptionRequestRepository,
+                ingredientHistoryRepository
+        );
 
         ingredient = new Ingredient(
                 GROUP_ID, OWNER_ID, "달걀", 5L, "개", "냉장",
-                true, null, null, null, "STORED", null,
-                LocalDateTime.of(2026, 11, 26, 10, 0)
+                true, null, null, null, "STORED", null
         );
 
         when(jdbcTemplate.queryForObject(
